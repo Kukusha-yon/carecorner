@@ -69,7 +69,7 @@ app.use(globalLimiter);
 // Body parser
 app.use(express.json({ limit: '10kb' })); // Limit body size to 10kb
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
+console.log('This is the hello world');
 // Data sanitization
 app.use(xss()); // Sanitize data
 app.use(hpp()); // Prevent HTTP Parameter Pollution
