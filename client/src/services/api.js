@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://carecorner-az5h51aua-yonatans-projects-2f1159da.vercel.app/api';
 
 // Define public routes that don't require authentication
 const publicRoutes = [

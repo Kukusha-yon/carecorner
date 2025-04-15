@@ -12,46 +12,8 @@ import { AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Pages
-// import Home from './pages/Home';
-// import Login from './pages/Login';
-// import Register from './pages/Register';
-// import ProfileSettings from './pages/ProfileSettings';
-// import ProductDetail from './pages/ProductDetail';
-// import Cart from './pages/Cart';
-// import Checkout from './pages/Checkout';
-// import OrderSuccess from './pages/OrderSuccess';
-// import OrderHistory from './pages/OrderHistory';
-// import SearchResults from './pages/SearchResults';
-// import AllProducts from './pages/AllProducts';
-// import Support from './pages/Support';
-// import FeaturedProductsPage from './pages/FeaturedProductsPage';
 
-// Category Pages
-// import CiscoSwitch from './pages/CiscoSwitch';
-// import Server from './pages/Server';
-// import Monitors from './pages/Monitors';
-// import LogitechWorld from './pages/LogitechWorld';
-// import Bags from './pages/Bags';
-// import Charger from './pages/Charger';
 
-// Admin Pages
-// import Dashboard from './pages/admin/Dashboard';
-// import Products from './pages/admin/Products';
-// import NewProduct from './pages/admin/NewProduct';
-// import EditProduct from './pages/admin/EditProduct';
-// import Users from './pages/admin/Users';
-// import Analytics from './pages/admin/Analytics';
-// import AdminOrders from './pages/admin/AdminOrders';
-// import NotFound from './pages/NotFound';
-// import FeaturedProducts from './pages/admin/FeaturedProducts';
-// import Partners from './pages/admin/Partners';
-// import Settings from './pages/admin/Settings';
-// import FeaturedProductForm from './components/admin/FeaturedProductForm';
-// import NewArrivals from './pages/admin/NewArrivals';
-// import NewArrivalFormPage from './pages/admin/NewArrivalFormPage';
-
-// Lazy load components
 const Home = lazy(() => import('./pages/Home'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Cart = lazy(() => import('./pages/Cart'));

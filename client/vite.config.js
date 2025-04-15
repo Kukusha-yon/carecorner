@@ -11,9 +11,9 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://carecorner-az5h51aua-yonatans-projects-2f1159da.vercel.app',
         changeOrigin: true,
-        secure: false
+        secure: true
       },
     },
   },
