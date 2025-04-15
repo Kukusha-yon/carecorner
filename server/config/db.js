@@ -6,16 +6,7 @@ import mongoose from 'mongoose';
 const connectDB = async () => {
   try {
     console.log('Attempting to connect to MongoDB...');
-    
-    // Check if MONGODB_URI is defined
-    if (!process.env.MONGODB_URI) {
-      console.error('MONGODB_URI is not defined in environment variables');
-      // Don't throw an error, just log it and continue
-      // This allows the server to start even if MongoDB connection fails
-      return;
-    }
-    
-    console.log('MongoDB URI:', process.env.MONGODB_URI ? 'URI is defined' : 'URI is undefined');
+    console.log('MongoDB URI:', process.env.MONGODB_URI);
     
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
@@ -77,9 +68,16 @@ const connectDB = async () => {
 
     return conn;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    // Don't throw the error, just log it and continue
-    // This allows the server to start even if MongoDB connection fails
+    console.error('Error connecting to MongoDB:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      codeName: error.codeName
+    });
+    // Instead of exiting, we'll throw the error to be handled by the application
+    setTimeout(connectDB, 5000);
+    throw error;
   }
 };
 
