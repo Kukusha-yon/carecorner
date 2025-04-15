@@ -23,6 +23,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Add a root route handler
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'CareCorner API is running',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    endpoints: [
+      '/api/test',
+      '/api/health'
+    ]
+  });
+});
+
 // Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {

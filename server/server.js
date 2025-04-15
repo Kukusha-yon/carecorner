@@ -100,6 +100,27 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
 
+// Add a root route handler
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'CareCorner API is running',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    endpoints: [
+      '/api/test',
+      '/api/auth',
+      '/api/products',
+      '/api/orders',
+      '/api/partners',
+      '/api/admin',
+      '/api/featured-products',
+      '/api/settings',
+      '/api/external',
+      '/api/new-arrivals'
+    ]
+  });
+});
+
 // Error handling
 app.use(errorHandler);
 
