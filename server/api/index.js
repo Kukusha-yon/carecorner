@@ -12,6 +12,7 @@ import rateLimit from 'express-rate-limit';
 import xss from 'xss-clean';
 import hpp from 'hpp';
 import compression from 'compression';
+import serverless from 'serverless-http';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -94,14 +95,9 @@ app.use(errorHandler);
 // Initialize settings
 initializeSettings();
 
-// Serve static files from the React app
-// app.use(express.static(path.join(__dirname, '../client/dist')));
-
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-// });
+// Export for Vercel
+export default app;
+export const handler = serverless(app);
 
 // Start server
 const PORT = process.env.PORT || 5001;
