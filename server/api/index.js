@@ -13,18 +13,18 @@ import xss from 'xss-clean';
 import hpp from 'hpp';
 import compression from 'compression';
 import serverless from 'serverless-http';
-import connectDB from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
-import productRoutes from './routes/productRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
-import partnerRoutes from './routes/partnerRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import featuredProductRoutes from './routes/featuredProductRoutes.js';
-import settingRoutes from './routes/settingRoutes.js';
-import apiRoutes from './routes/apiRoutes.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
-import { initializeSettings } from './controllers/settingController.js';
-import newArrivalRoutes from './routes/newArrivalRoutes.js';
+import connectDB from '../config/db.js';
+import authRoutes from '../routes/authRoutes.js';
+import productRoutes from '../routes/productRoutes.js';
+import orderRoutes from '../routes/orderRoutes.js';
+import partnerRoutes from '../routes/partnerRoutes.js';
+import adminRoutes from '../routes/adminRoutes.js';
+import featuredProductRoutes from '../routes/featuredProductRoutes.js';
+import settingRoutes from '../routes/settingRoutes.js';
+import apiRoutes from '../routes/apiRoutes.js';
+import { errorHandler } from '../middleware/errorMiddleware.js';
+import { initializeSettings } from '../controllers/settingController.js';
+import newArrivalRoutes from '../routes/newArrivalRoutes.js';
 
 // Create Express app
 const app = express();
@@ -88,6 +88,11 @@ app.use('/api/featured-products', featuredProductRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/external', apiRoutes);
 app.use('/api/new-arrivals', newArrivalRoutes);
+
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 
 // Error handling
 app.use(errorHandler);
