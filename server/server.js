@@ -33,7 +33,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Connect to MongoDB
-connectDB();
+connectDB().catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
+  // Don't exit the process, just log the error
+});
 
 // Security middleware
 app.use(helmet({
@@ -92,11 +95,19 @@ app.use('/api/settings', settingRoutes);
 app.use('/api/external', apiRoutes);
 app.use('/api/new-arrivals', newArrivalRoutes);
 
+// Add a simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 // Error handling
 app.use(errorHandler);
 
 // Initialize settings
-initializeSettings();
+initializeSettings().catch(err => {
+  console.error('Failed to initialize settings:', err);
+  // Don't exit the process, just log the error
+});
 
 // Serve static files from the React app
 // app.use(express.static(path.join(__dirname, '../client/dist')));
