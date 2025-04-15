@@ -54,7 +54,11 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
 })); // Adds various HTTP headers for security
 app.use(cors({
-  origin: [process.env.CLIENT_URL || 'http://localhost:3000', 'http://localhost:5173'],
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    'http://localhost:5173',
+    'https://carecorner-az5h51aua-yonatans-projects-2f1159da.vercel.app'
+  ],
   credentials: true
 }));
 
