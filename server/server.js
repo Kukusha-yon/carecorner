@@ -35,6 +35,12 @@ const __dirname = dirname(__filename);
 // Connect to MongoDB
 connectDB();
 
+
+app.get('/', (req,res) => {
+  res.json({
+    message: "Welcome to my website"
+  })
+})
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
