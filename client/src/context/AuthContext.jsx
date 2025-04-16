@@ -95,20 +95,34 @@ export const AuthProvider = ({ children }) => {
               if (response.refreshToken) {
                 localStorage.setItem('refreshToken', response.refreshToken);
               }
-              // Continue with user fetch
+              // Continue with user fetch using the new token
+              const user = await getCurrentUserService();
+              if (user && user._id) {
+                console.log('User authenticated successfully:', user.email, 'Role:', user.role);
+                setUser(user);
+                return user;
+              }
             } else {
               throw new Error('Invalid refresh response');
             }
           } catch (refreshError) {
             console.error('Token refresh failed:', refreshError);
-            // Don't clear tokens immediately, let the component handle it
+            // Clear tokens and user state only if refresh fails
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            setUser(null);
             return null;
           }
         } else {
+          // Clear tokens and user state if both tokens are expired
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
           return null;
         }
       }
       
+      // If we have a valid token, fetch user data
       try {
         console.log('Token valid, fetching user data...');
         const user = await getCurrentUserService();
@@ -119,11 +133,17 @@ export const AuthProvider = ({ children }) => {
           return user;
         } else {
           console.log('Server returned invalid user data');
+          setUser(null);
           return null;
         }
       } catch (error) {
         console.error('Error getting current user:', error);
-        // Don't clear user state immediately, let the component handle it
+        if (error.response?.status === 401) {
+          // Only clear state on 401 errors
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          setUser(null);
+        }
         return null;
       }
     } catch (error) {

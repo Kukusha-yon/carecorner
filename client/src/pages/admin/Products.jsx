@@ -49,18 +49,23 @@ const Products = () => {
         return result;
       } catch (error) {
         console.error('Error fetching products:', error);
-        // Don't redirect to login here, let the error be handled by the error boundary
+        if (error.response?.status === 401) {
+          // Let the auth check handle the redirect
+          console.log('Authentication error in products query');
+        }
         throw error;
       }
     },
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
-    retry: 1, // Only retry once to avoid infinite loops
+    retry: 1,
+    enabled: !!user && user.role === 'admin', // Only run query if user is admin
     onError: (error) => {
       console.error('Products query error:', error);
-      // Only show error toast for authentication errors
       if (error.response?.status === 401) {
         toast.error('Your session has expired. Please log in again.');
+      } else {
+        toast.error('Error loading products. Please try again.');
       }
     }
   });
@@ -68,8 +73,8 @@ const Products = () => {
   // Handle authentication errors
   useEffect(() => {
     if (error && error.response?.status === 401) {
-      // Don't immediately redirect, let the user see the error message
       console.error('Authentication error in Products component:', error);
+      // Let the auth check useEffect handle the redirect
     }
   }, [error]);
 
