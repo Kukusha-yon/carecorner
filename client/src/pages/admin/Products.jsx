@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getProducts, deleteProduct, updateProduct } from '../../services/productService';
 import { toast } from 'react-hot-toast';
 import { PRODUCT_CATEGORIES } from '../../services/productService';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Search, 
   Plus, 
@@ -21,6 +22,7 @@ import {
 const Products = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [sortField, setSortField] = useState('name');
@@ -31,20 +33,11 @@ const Products = () => {
 
   // Check if the user is logged in and has the correct role
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
-    
-    console.log('Authentication check:', {
-      token: token ? 'Present' : 'Missing',
-      user: user ? 'Present' : 'Missing',
-      role: user?.role
-    });
-    
-    if (!token || !user || user.role !== 'admin') {
+    if (!loading && (!user || user.role !== 'admin')) {
       console.log('User not authenticated or not an admin, redirecting to login');
       navigate('/login');
     }
-  }, [navigate]);
+  }, [user, loading, navigate]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products', 'admin'],
