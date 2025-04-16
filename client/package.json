@@ -41,6 +41,7 @@
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
+    "terser": "^5.28.1",
     "vite": "^5.1.6",
     "vite-bundle-visualizer": "^0.9.0"
   }
