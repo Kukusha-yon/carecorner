@@ -61,6 +61,7 @@ api.interceptors.response.use(
     const newToken = response.headers['x-new-token'];
     if (newToken) {
       localStorage.setItem('token', newToken);
+      console.log('New token received and stored');
     }
     return response;
   },
@@ -68,7 +69,8 @@ api.interceptors.response.use(
     console.error('API response error:', {
       url: error.config?.url,
       status: error.response?.status,
-      data: error.response?.data
+      data: error.response?.data,
+      message: error.message
     });
     
     const originalRequest = error.config;
@@ -87,6 +89,10 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
           console.error('No refresh token available');
+          // Clear all auth data and redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
           throw new Error('No refresh token available');
         }
         
@@ -99,33 +105,31 @@ api.interceptors.response.use(
           throw new Error('Invalid refresh token response');
         }
         
-        // Save both the new access token and refresh token
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-        localStorage.setItem('token', accessToken);
-        console.log('New access token saved');
-        
-        if (newRefreshToken) {
-          localStorage.setItem('refreshToken', newRefreshToken);
-          console.log('New refresh token saved');
+        // Store the new tokens
+        localStorage.setItem('token', response.data.accessToken);
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken);
         }
         
-        // Update the Authorization header for the retry
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        // Update the Authorization header
+        originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
         
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Clear tokens on refresh failure
+        // Clear all auth data and redirect to login
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        throw new Error('Session expired. Please log in again.');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
     }
     
-    // For non-public routes with 401 errors, throw a specific error
-    if (error.response?.status === 401 && !isPublicRoute) {
-      throw new Error('Authentication required');
+    // Handle CORS errors
+    if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
+      console.error('CORS or network error detected');
+      return Promise.reject(new Error('Unable to connect to the server. Please check your internet connection.'));
     }
     
     return Promise.reject(error);
