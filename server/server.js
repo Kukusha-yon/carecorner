@@ -49,7 +49,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5000", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-phi.vercel.app"],
+      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5000", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-phi.vercel.app", "https://carecorner-bl2n-76wmt0zk3-yonatans-projects-2f1159da.vercel.app"],
       fontSrc: ["'self'", "https:", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
@@ -64,7 +64,8 @@ app.use(cors({
     process.env.CLIENT_URL || 'http://localhost:3000',
     'http://localhost:5173',
     'https://carecorner-bl2n.vercel.app',
-    'https://carecorner-bl2n-*.vercel.app'  // This will match all preview URLs
+    'https://carecorner-bl2n-*.vercel.app',  // This will match all preview URLs
+    'https://carecorner-bl2n-76wmt0zk3-yonatans-projects-2f1159da.vercel.app'  // Specific preview URL
   ],
   credentials: true
 }));
