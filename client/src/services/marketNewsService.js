@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_KEY = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY;
+// Use a hardcoded API key
+const API_KEY = 'M7D09RV5M7LUPML3';
 const BASE_URL = 'https://www.alphavantage.co/query';
 
 // Get stock data

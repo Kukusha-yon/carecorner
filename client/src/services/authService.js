@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Use a hardcoded value for the backend URL
+const API_URL = 'https://carecorner-phi.vercel.app/api';
 
 // Create axios instance with default config
 const api = axios.create({
