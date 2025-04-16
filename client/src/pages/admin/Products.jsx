@@ -43,12 +43,26 @@ const Products = () => {
     queryKey: ['products', 'admin'],
     queryFn: async () => {
       console.log('Fetching products with admin parameter');
-      const result = await getProducts({ admin: true });
-      console.log('Products data received:', result);
-      return result;
+      try {
+        const result = await getProducts({ admin: true });
+        console.log('Products data received:', result);
+        return result;
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        // Don't redirect to login here, let the error be handled by the error boundary
+        throw error;
+      }
     },
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
+    retry: 1, // Only retry once to avoid infinite loops
+    onError: (error) => {
+      console.error('Products query error:', error);
+      // Only redirect to login if it's an authentication error
+      if (error.response?.status === 401) {
+        toast.error('Your session has expired. Please log in again.');
+      }
+    }
   });
 
   console.log('Products data in component:', productsData);

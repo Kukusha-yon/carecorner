@@ -86,39 +86,45 @@ api.interceptors.response.use(
         // Try to refresh the token
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          console.error('No refresh token available');
+          // Don't redirect immediately, let the component handle it
+          return Promise.reject(error);
         }
         
+        console.log('Attempting to refresh token...');
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {
           refreshToken
         });
         
         // Save both the new access token and refresh token
         const { accessToken, refreshToken: newRefreshToken } = response.data;
-        localStorage.setItem('token', accessToken);
+        if (accessToken) {
+          localStorage.setItem('token', accessToken);
+          console.log('New access token saved');
+        }
         
         // Save the new refresh token if it exists
         if (newRefreshToken) {
           localStorage.setItem('refreshToken', newRefreshToken);
+          console.log('New refresh token saved');
         }
         
         // Retry the original request with the new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh token fails, clear tokens and redirect to login
+        console.error('Token refresh failed:', refreshError);
+        // If refresh token fails, clear tokens but don't redirect immediately
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
     
-    // Only redirect to login for non-public routes
+    // Only redirect to login for non-public routes if it's a 401 error
     if (error.response?.status === 401 && !isPublicRoute) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
+      // Don't redirect immediately, let the component handle it
+      console.error('Authentication error:', error.response?.data?.message || 'Unauthorized');
     }
     
     return Promise.reject(error);

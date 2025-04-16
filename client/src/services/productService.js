@@ -96,8 +96,22 @@ export const updateProduct = async (id, formData) => {
 };
 
 export const deleteProduct = async (id) => {
-  const response = await api.delete(`/products/${id}`);
-  return response.data;
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await api.delete(`/products/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Delete product error:', error);
+    throw error;
+  }
 };
 
 export const getBestSellers = async () => {
