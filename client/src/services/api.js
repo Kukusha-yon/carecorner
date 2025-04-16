@@ -87,8 +87,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
           console.error('No refresh token available');
-          // Don't redirect immediately, let the component handle it
-          return Promise.reject(error);
+          throw new Error('No refresh token available');
         }
         
         console.log('Attempting to refresh token...');
@@ -96,35 +95,37 @@ api.interceptors.response.use(
           refreshToken
         });
         
-        // Save both the new access token and refresh token
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-        if (accessToken) {
-          localStorage.setItem('token', accessToken);
-          console.log('New access token saved');
+        if (!response.data || !response.data.accessToken) {
+          throw new Error('Invalid refresh token response');
         }
         
-        // Save the new refresh token if it exists
+        // Save both the new access token and refresh token
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        localStorage.setItem('token', accessToken);
+        console.log('New access token saved');
+        
         if (newRefreshToken) {
           localStorage.setItem('refreshToken', newRefreshToken);
           console.log('New refresh token saved');
         }
         
-        // Retry the original request with the new token
+        // Update the Authorization header for the retry
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        
+        // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // If refresh token fails, clear tokens but don't redirect immediately
+        // Clear tokens on refresh failure
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        return Promise.reject(refreshError);
+        throw new Error('Session expired. Please log in again.');
       }
     }
     
-    // Only redirect to login for non-public routes if it's a 401 error
+    // For non-public routes with 401 errors, throw a specific error
     if (error.response?.status === 401 && !isPublicRoute) {
-      // Don't redirect immediately, let the component handle it
-      console.error('Authentication error:', error.response?.data?.message || 'Unauthorized');
+      throw new Error('Authentication required');
     }
     
     return Promise.reject(error);

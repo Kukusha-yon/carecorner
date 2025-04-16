@@ -34,7 +34,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const decoded = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      return decoded.exp < currentTime;
+      // Add a 5-minute buffer to prevent edge cases
+      return decoded.exp < currentTime + 300;
     } catch (error) {
       console.error('Error decoding token:', error);
       return true;
@@ -111,14 +112,14 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             setUser(null);
-            return null;
+            throw new Error('Session expired. Please log in again.');
           }
         } else {
           // Clear tokens and user state if both tokens are expired
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           setUser(null);
-          return null;
+          throw new Error('Session expired. Please log in again.');
         }
       }
       
@@ -134,7 +135,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.log('Server returned invalid user data');
           setUser(null);
-          return null;
+          throw new Error('Invalid user data');
         }
       } catch (error) {
         console.error('Error getting current user:', error);
@@ -143,12 +144,14 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           setUser(null);
+          throw new Error('Session expired. Please log in again.');
         }
-        return null;
+        throw error;
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      return null;
+      setUser(null);
+      throw error;
     } finally {
       setLoading(false);
     }

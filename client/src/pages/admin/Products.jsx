@@ -22,7 +22,7 @@ import {
 const Products = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, checkAuth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [sortField, setSortField] = useState('name');
@@ -30,14 +30,33 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [itemsPerPage] = useState(10);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   // Check if the user is logged in and has the correct role
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) {
-      console.log('User not authenticated or not an admin, redirecting to login');
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
+    const verifyAuth = async () => {
+      if (isCheckingAuth) return;
+      
+      try {
+        setIsCheckingAuth(true);
+        if (!loading && (!user || user.role !== 'admin')) {
+          console.log('Verifying authentication...');
+          const authUser = await checkAuth();
+          if (!authUser || authUser.role !== 'admin') {
+            console.log('User not authenticated or not an admin, redirecting to login');
+            navigate('/login');
+          }
+        }
+      } catch (error) {
+        console.error('Auth verification error:', error);
+        navigate('/login');
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    verifyAuth();
+  }, [user, loading, navigate, checkAuth, isCheckingAuth]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products', 'admin'],
@@ -49,9 +68,8 @@ const Products = () => {
         return result;
       } catch (error) {
         console.error('Error fetching products:', error);
-        if (error.response?.status === 401) {
-          // Let the auth check handle the redirect
-          console.log('Authentication error in products query');
+        if (error.message === 'Session expired. Please log in again.') {
+          navigate('/login');
         }
         throw error;
       }
@@ -59,11 +77,12 @@ const Products = () => {
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
     retry: 1,
-    enabled: !!user && user.role === 'admin', // Only run query if user is admin
+    enabled: !!user && user.role === 'admin' && !isCheckingAuth,
     onError: (error) => {
       console.error('Products query error:', error);
-      if (error.response?.status === 401) {
+      if (error.message === 'Session expired. Please log in again.') {
         toast.error('Your session has expired. Please log in again.');
+        navigate('/login');
       } else {
         toast.error('Error loading products. Please try again.');
       }
