@@ -38,4 +38,10 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@headlessui/react', '@heroicons/react', 'framer-motion', 'chart.js', 'react-chartjs-2', 'recharts', 'formik', 'yup']
+  },
+  define: {
+    'process.env': {}
+  }
 })
