@@ -63,7 +63,7 @@ app.use(cors({
   origin: [
     process.env.CLIENT_URL || 'http://localhost:3000',
     'http://localhost:5173',
-    'https://carecorner-bl2n.vercel.app'
+    'https://carecorner-bl2n-4qdathe3j-yonatans-projects-2f1159da.vercel.app/'
   ],
   credentials: true
 }));
