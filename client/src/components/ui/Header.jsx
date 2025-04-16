@@ -224,7 +224,7 @@ const Header = () => {
             ) : (
               <SmoothLink
                 to="/login"
-                className="hidden sm:inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors"
+                className="hidden md:inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors"
               >
                 Sign In
               </SmoothLink>
