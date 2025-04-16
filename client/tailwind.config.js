@@ -7,8 +7,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#0070f3',
-        secondary: '#00a3bf',
+        primary: 'var(--primary-color)',
+        secondary: 'var(--secondary-color)',
+        background: 'var(--background-color)',
+        text: 'var(--text-color)',
+        error: 'var(--error-color)',
+        success: 'var(--success-color)',
+        warning: 'var(--warning-color)',
+        info: 'var(--info-color)',
       },
       keyframes: {
         'fade-in': {
