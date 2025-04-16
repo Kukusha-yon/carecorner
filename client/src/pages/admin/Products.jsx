@@ -58,12 +58,20 @@ const Products = () => {
     retry: 1, // Only retry once to avoid infinite loops
     onError: (error) => {
       console.error('Products query error:', error);
-      // Only redirect to login if it's an authentication error
+      // Only show error toast for authentication errors
       if (error.response?.status === 401) {
         toast.error('Your session has expired. Please log in again.');
       }
     }
   });
+
+  // Handle authentication errors
+  useEffect(() => {
+    if (error && error.response?.status === 401) {
+      // Don't immediately redirect, let the user see the error message
+      console.error('Authentication error in Products component:', error);
+    }
+  }, [error]);
 
   console.log('Products data in component:', productsData);
   const products = productsData?.products || [];

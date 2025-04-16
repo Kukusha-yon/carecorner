@@ -101,16 +101,11 @@ export const AuthProvider = ({ children }) => {
             }
           } catch (refreshError) {
             console.error('Token refresh failed:', refreshError);
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            setUser(null);
-            setLoading(false);
-            return;
+            // Don't clear tokens immediately, let the component handle it
+            return null;
           }
         } else {
-          setUser(null);
-          setLoading(false);
-          return;
+          return null;
         }
       }
       
@@ -121,17 +116,19 @@ export const AuthProvider = ({ children }) => {
         if (user && user._id) {
           console.log('User authenticated successfully:', user.email, 'Role:', user.role);
           setUser(user);
+          return user;
         } else {
           console.log('Server returned invalid user data');
-          setUser(null);
+          return null;
         }
       } catch (error) {
         console.error('Error getting current user:', error);
-        setUser(null);
+        // Don't clear user state immediately, let the component handle it
+        return null;
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
