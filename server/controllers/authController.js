@@ -22,7 +22,7 @@ const generateAccessToken = (user) => {
       role: user.role 
     },
     process.env.JWT_SECRET,
-    { expiresIn: '24h' }
+    { expiresIn: process.env.JWT_EXPIRE }
   );
 };
 
@@ -33,7 +33,7 @@ const generateRefreshToken = (user) => {
       role: user.role 
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE }
   );
 };
 
@@ -343,7 +343,7 @@ export const refreshToken = async (req, res) => {
       },
       process.env.JWT_SECRET,
       { 
-        expiresIn: '24h',  // Increased from 15m to 24h
+        expiresIn: process.env.JWT_EXPIRE,
         algorithm: 'HS256'
       }
     );
@@ -357,7 +357,7 @@ export const refreshToken = async (req, res) => {
       },
       process.env.JWT_REFRESH_SECRET,
       { 
-        expiresIn: '30d',  // 30 days
+        expiresIn: process.env.JWT_REFRESH_EXPIRE,
         algorithm: 'HS256'
       }
     );
