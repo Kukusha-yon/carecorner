@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://carecorner-phi.vercel.app/';
+const API_URL = import.meta.env.VITE_API_URL || 'https://carecorner-phi.vercel.app/api';
 
 // Define public routes that don't require authentication
 const publicRoutes = [
