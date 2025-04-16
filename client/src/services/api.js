@@ -7,7 +7,10 @@ const publicRoutes = [
   '/external/stock-data',
   '/external/news',
   '/products/featured',
-  '/products/categories'
+  '/products/categories',
+  '/partners',
+  '/featured-products',
+  '/new-arrivals'
 ];
 
 const api = axios.create({
