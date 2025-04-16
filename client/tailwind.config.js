@@ -7,7 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: 'var(--primary-color)',
+        primary: {
+          DEFAULT: '#39b54a',
+          dark: '#2d8f3a',
+        },
         secondary: 'var(--secondary-color)',
         background: 'var(--background-color)',
         text: 'var(--text-color)',
@@ -51,4 +54,5 @@ export default {
   experimental: {
     optimizeUniversalDefaults: true,
   },
+  plugins: [],
 } 
