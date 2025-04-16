@@ -10,7 +10,7 @@ import {
   refreshToken as refreshTokenService
 } from '../services/authService';
 import toast from 'react-hot-toast';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext(null);
 
@@ -90,9 +90,9 @@ export const AuthProvider = ({ children }) => {
           console.log('Attempting to refresh token...');
           try {
             const response = await refreshTokenService({ refreshToken });
-            if (response && response.accessToken) {
+            if (response && response.token) {
               console.log('Token refreshed successfully');
-              localStorage.setItem('token', response.accessToken);
+              localStorage.setItem('token', response.token);
               if (response.refreshToken) {
                 localStorage.setItem('refreshToken', response.refreshToken);
               }
@@ -103,8 +103,6 @@ export const AuthProvider = ({ children }) => {
                 setUser(user);
                 return user;
               }
-            } else {
-              throw new Error('Invalid refresh response');
             }
           } catch (refreshError) {
             console.error('Token refresh failed:', refreshError);
@@ -112,14 +110,16 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token');
             localStorage.removeItem('refreshToken');
             setUser(null);
-            throw new Error('Session expired. Please log in again.');
+            navigate('/login');
+            return null;
           }
         } else {
           // Clear tokens and user state if both tokens are expired
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           setUser(null);
-          throw new Error('Session expired. Please log in again.');
+          navigate('/login');
+          return null;
         }
       }
       
@@ -132,10 +132,6 @@ export const AuthProvider = ({ children }) => {
           console.log('User authenticated successfully:', user.email, 'Role:', user.role);
           setUser(user);
           return user;
-        } else {
-          console.log('Server returned invalid user data');
-          setUser(null);
-          throw new Error('Invalid user data');
         }
       } catch (error) {
         console.error('Error getting current user:', error);
@@ -144,14 +140,17 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           setUser(null);
-          throw new Error('Session expired. Please log in again.');
+          navigate('/login');
+          return null;
         }
-        throw error;
       }
+      
+      return null;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
-      throw error;
+      navigate('/login');
+      return null;
     } finally {
       setLoading(false);
     }

@@ -4,9 +4,38 @@ import axios from 'axios';
 const API_KEY = 'M7D09RV5M7LUPML3';
 const BASE_URL = 'https://www.alphavantage.co/query';
 
+// Cache for API responses to reduce API calls
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Helper function to check cache
+const getCachedData = (key) => {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  return null;
+};
+
+// Helper function to set cache
+const setCachedData = (key, data) => {
+  cache.set(key, {
+    data,
+    timestamp: Date.now()
+  });
+};
+
 // Get stock data
 export const getStockData = async (symbol = 'AAPL') => {
   try {
+    // Check cache first
+    const cacheKey = `stock_${symbol}`;
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached stock data for:', symbol);
+      return cachedData;
+    }
+
     console.log('Fetching stock data for symbol:', symbol);
     const response = await axios.get(`${BASE_URL}`, {
       params: {
@@ -26,28 +55,34 @@ export const getStockData = async (symbol = 'AAPL') => {
     // Check for rate limit message
     if (response.data.Information && response.data.Information.includes('API call frequency')) {
       console.warn('Rate limit reached:', response.data.Information);
-      // Return mock data instead of throwing an error
-      return getMockStockData();
+      const mockData = getMockStockData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (response.data.Note) {
       console.warn('API Note:', response.data.Note);
-      // Return mock data instead of throwing an error
-      return getMockStockData();
+      const mockData = getMockStockData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (response.data['Error Message']) {
       console.error('API Error:', response.data['Error Message']);
-      // Return mock data instead of throwing an error
-      return getMockStockData();
+      const mockData = getMockStockData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (!response.data['Time Series (Daily)']) {
       console.warn('Invalid stock data structure received');
-      // Return mock data instead of throwing an error
-      return getMockStockData();
+      const mockData = getMockStockData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
+    // Cache the successful response
+    setCachedData(cacheKey, response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching stock data:', error);
@@ -55,8 +90,9 @@ export const getStockData = async (symbol = 'AAPL') => {
       console.error('API Response:', error.response.data);
       console.error('API Status:', error.response.status);
     }
-    // Return mock data instead of throwing an error
-    return getMockStockData();
+    const mockData = getMockStockData();
+    setCachedData(cacheKey, mockData);
+    return mockData;
   }
 };
 
@@ -93,6 +129,14 @@ const getMockStockData = () => {
 // Get company overview
 export const getCompanyOverview = async (symbol) => {
   try {
+    // Check cache first
+    const cacheKey = `overview_${symbol}`;
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached company overview for:', symbol);
+      return cachedData;
+    }
+
     const response = await axios.get(`${BASE_URL}`, {
       params: {
         function: 'OVERVIEW',
@@ -105,6 +149,8 @@ export const getCompanyOverview = async (symbol) => {
       throw new Error('Invalid company overview data received');
     }
 
+    // Cache the successful response
+    setCachedData(cacheKey, response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching company overview:', error);
@@ -115,6 +161,14 @@ export const getCompanyOverview = async (symbol) => {
 // Get news data
 export const getNewsData = async (symbol = 'AAPL') => {
   try {
+    // Check cache first
+    const cacheKey = `news_${symbol}`;
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached news data for:', symbol);
+      return cachedData;
+    }
+
     console.log('Fetching news data for symbol:', symbol);
     const response = await axios.get(`${BASE_URL}`, {
       params: {
@@ -134,28 +188,34 @@ export const getNewsData = async (symbol = 'AAPL') => {
     // Check for rate limit message
     if (response.data.Information && response.data.Information.includes('API call frequency')) {
       console.warn('Rate limit reached:', response.data.Information);
-      // Return mock data instead of throwing an error
-      return getMockNewsData();
+      const mockData = getMockNewsData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (response.data.Note) {
       console.warn('API Note:', response.data.Note);
-      // Return mock data instead of throwing an error
-      return getMockNewsData();
+      const mockData = getMockNewsData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (response.data['Error Message']) {
       console.error('API Error:', response.data['Error Message']);
-      // Return mock data instead of throwing an error
-      return getMockNewsData();
+      const mockData = getMockNewsData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
     if (!response.data.feed) {
       console.warn('Invalid news data structure received');
-      // Return mock data instead of throwing an error
-      return getMockNewsData();
+      const mockData = getMockNewsData();
+      setCachedData(cacheKey, mockData);
+      return mockData;
     }
 
+    // Cache the successful response
+    setCachedData(cacheKey, response.data.feed);
     return response.data.feed;
   } catch (error) {
     console.error('Error fetching news data:', error);
@@ -163,8 +223,9 @@ export const getNewsData = async (symbol = 'AAPL') => {
       console.error('API Response:', error.response.data);
       console.error('API Status:', error.response.status);
     }
-    // Return mock data instead of throwing an error
-    return getMockNewsData();
+    const mockData = getMockNewsData();
+    setCachedData(cacheKey, mockData);
+    return mockData;
   }
 };
 
@@ -207,6 +268,14 @@ const getMockNewsData = () => {
 // Get global news
 export const getGlobalNews = async () => {
   try {
+    // Check cache first
+    const cacheKey = 'global_news';
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('Using cached global news data');
+      return cachedData;
+    }
+
     const response = await axios.get(`${BASE_URL}`, {
       params: {
         function: 'NEWS_SENTIMENT',
@@ -219,120 +288,31 @@ export const getGlobalNews = async () => {
       throw new Error('Invalid global news data received');
     }
 
+    // Cache the successful response
+    setCachedData(cacheKey, response.data.feed);
     return response.data.feed;
   } catch (error) {
     console.error('Error fetching global news:', error);
-    throw new Error('Failed to fetch global news');
+    return getMockNewsData();
   }
 };
 
-// Cache for storing data between updates
-let stockDataCache = null;
-let newsDataCache = null;
-let lastStockUpdate = 0;
-let lastNewsUpdate = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-// Fetch stock market data for tech companies
-export const fetchStockData = async () => {
-  try {
-    // Check if we have cached data that's still valid
-    const now = Date.now();
-    if (stockDataCache && (now - lastStockUpdate < CACHE_DURATION)) {
-      console.log('Using cached stock data');
-      return stockDataCache;
-    }
-
-    const response = await axios.get(BASE_URL, {
-      params: {
-        function: 'TIME_SERIES_DAILY',
-        symbol: 'AAPL',
-        apikey: API_KEY,
-        outputsize: 'compact'
-      }
-    });
-    
-    // Check for rate limit error
-    if (response.data['Error Message']) {
-      console.log('API error, using mock data');
-      return generateMockStockData();
-    }
-    
-    // Cache the successful response
-    stockDataCache = response.data;
-    lastStockUpdate = now;
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching stock data:', error);
-    return generateMockStockData();
-  }
-};
-
-// Fetch electronics news
-export const fetchNews = async () => {
-  try {
-    // Check if we have cached data that's still valid
-    const now = Date.now();
-    if (newsDataCache && (now - lastNewsUpdate < CACHE_DURATION)) {
-      console.log('Using cached news data');
-      return newsDataCache;
-    }
-
-    const response = await axios.get(BASE_URL, {
-      params: {
-        function: 'NEWS_SENTIMENT',
-        tickers: 'AAPL',
-        apikey: API_KEY,
-        topics: 'technology,earnings,forex,crypto'
-      }
-    });
-    
-    // Ensure we have a valid response structure
-    if (!response.data || !response.data.feed) {
-      console.log('Invalid news data structure, using mock data');
-      return generateMockNewsData();
-    }
-    
-    // Cache the successful response
-    newsDataCache = response.data;
-    lastNewsUpdate = now;
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching news:', error);
-    return generateMockNewsData();
-  }
-};
-
-// Process stock data for Chart.js
+// Process stock data for chart
 export const processStockDataForChart = (timeSeriesData) => {
-  if (!timeSeriesData) {
-    console.log('No time series data available');
-    return null;
+  if (!timeSeriesData || !timeSeriesData['Time Series (Daily)']) {
+    console.warn('Invalid time series data structure');
+    return [];
   }
-  
-  console.log('Processing time series data:', timeSeriesData);
-  
-  // Get the last 10 data points
-  const dataPoints = Object.entries(timeSeriesData)
-    .slice(0, 10)
-    .reverse(); // Reverse to show oldest to newest
-  
-  return {
-    labels: dataPoints.map(([timestamp]) => {
-      const date = new Date(timestamp);
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }),
-    datasets: [
-      {
-        label: 'Stock Price',
-        data: dataPoints.map(([, data]) => parseFloat(data['4. close'])),
-        borderColor: '#39b54a',
-        backgroundColor: 'rgba(57, 181, 74, 0.1)',
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  };
+
+  const dailyData = timeSeriesData['Time Series (Daily)'];
+  return Object.entries(dailyData)
+    .map(([date, values]) => ({
+      date,
+      open: parseFloat(values['1. open']),
+      high: parseFloat(values['2. high']),
+      low: parseFloat(values['3. low']),
+      close: parseFloat(values['4. close']),
+      volume: parseInt(values['5. volume'])
+    }))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 }; 

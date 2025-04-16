@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
-import { Search, ShoppingCart, Menu, X, User, LogOut, Settings, Package, History } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, User, LogOut, Settings, Package, History, Home, Network, Server, Monitor, Mouse, Briefcase, Battery } from 'lucide-react';
 import SmoothLink from './SmoothLink';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -222,12 +222,14 @@ const Header = () => {
                 </AnimatePresence>
               </div>
             ) : (
-              <SmoothLink
-                to="/login"
-                className="hidden md:inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors"
-              >
-                Sign In
-              </SmoothLink>
+              <div className="hidden md:block">
+                <SmoothLink
+                  to="/login"
+                  className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors"
+                >
+                  Sign In
+                </SmoothLink>
+              </div>
             )}
 
             {/* Mobile Menu Button */}
@@ -313,122 +315,152 @@ const Header = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-gray-200"
+            className="md:hidden bg-white border-t border-gray-200 shadow-lg"
           >
-            <div className="px-4 py-2 space-y-1">
+            <div className="px-4 py-4 space-y-3">
               {!user && (
-                <div className="px-4 py-3 mb-2 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Sign in to access your account</p>
+                <div className="px-4 py-4 mb-2 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-100">
+                  <p className="text-sm font-medium text-gray-800 mb-3">Sign in to access your account</p>
                   <Link
                     to="/login"
-                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors"
+                    className="w-full inline-flex justify-center items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-[#39b54a] hover:bg-[#2d8f3a] transition-colors shadow-sm"
                   >
                     Sign In
                   </Link>
                 </div>
               )}
               
-              <SmoothLink
-                to="/"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Home
-              </SmoothLink>
-              <SmoothLink
-                to="/cisco-switch"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/cisco-switch'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                CISCO Switch
-              </SmoothLink>
-              <SmoothLink
-                to="/server"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/server'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Server
-              </SmoothLink>
-              <SmoothLink
-                to="/monitors"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/monitors'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Monitors
-              </SmoothLink>
-              <SmoothLink
-                to="/logitech"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/logitech'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Logitech World
-              </SmoothLink>
-              <SmoothLink
-                to="/bags"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/bags'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Bags
-              </SmoothLink>
-              <SmoothLink
-                to="/charger"
-                className={`block px-4 py-2 text-base font-medium rounded-md ${
-                  location.pathname === '/charger'
-                    ? 'bg-[#39b54a]/10 text-[#39b54a]'
-                    : 'text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                Chargers
-              </SmoothLink>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <SmoothLink
+                  to="/"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Home className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Home</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/cisco-switch"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/cisco-switch'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Network className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">CISCO</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/server"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/server'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Server className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Server</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/monitors"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/monitors'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Monitor className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Monitors</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/logitech"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/logitech'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Mouse className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Logitech</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/bags"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/bags'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Briefcase className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Bags</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/charger"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/charger'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Battery className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Chargers</span>
+                </SmoothLink>
+                <SmoothLink
+                  to="/search"
+                  className={`flex flex-col items-center justify-center p-3 rounded-xl ${
+                    location.pathname === '/search'
+                      ? 'bg-[#39b54a]/10 text-[#39b54a]'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Search className="w-5 h-5 mb-1" />
+                  <span className="text-xs font-medium">Search</span>
+                </SmoothLink>
+              </div>
               
               {user && (
-                <div className="border-t border-gray-200 mt-2 pt-2">
+                <div className="border-t border-gray-200 pt-3 mt-2">
+                  <div className="flex items-center px-2 py-2 mb-2">
+                    <div className="w-8 h-8 rounded-full bg-[#39b54a] text-white flex items-center justify-center font-medium mr-3">
+                      {getUserInitials()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
+                  
                   <Link
                     to="/profile-settings"
-                    className="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="flex items-center px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg mb-1"
                   >
-                    <User className="w-5 h-5 mr-3" />
+                    <User className="w-4 h-4 mr-3 text-gray-500" />
                     Profile
                   </Link>
                   <Link
                     to="/orders"
-                    className="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-50 rounded-md"
+                    className="flex items-center px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg mb-1"
                   >
-                    <History className="w-5 h-5 mr-3" />
+                    <History className="w-4 h-4 mr-3 text-gray-500" />
                     Orders
                   </Link>
                   {user.role === 'admin' && (
                     <Link
                       to="/admin"
-                      className="flex items-center px-4 py-2 text-base text-gray-700 hover:bg-gray-50 rounded-md"
+                      className="flex items-center px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg mb-1"
                     >
-                      <Settings className="w-5 h-5 mr-3" />
+                      <Settings className="w-4 h-4 mr-3 text-gray-500" />
                       Admin Dashboard
                     </Link>
                   )}
                   <button
                     onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-2 text-base text-red-600 hover:bg-gray-50 rounded-md"
+                    className="flex items-center w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg mt-2"
                   >
-                    <LogOut className="w-5 h-5 mr-3" />
+                    <LogOut className="w-4 h-4 mr-3" />
                     Logout
                   </button>
                 </div>

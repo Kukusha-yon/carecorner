@@ -68,15 +68,16 @@ api.interceptors.response.use(
         throw new Error('No refresh token available');
       }
 
-      const response = await api.post('/auth/refresh-token', { refreshToken });
+      const response = await api.post('/auth/refresh', { refreshToken });
       
-      // Extract tokens correctly from the response
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      
-      if (accessToken) {
-        localStorage.setItem('token', accessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      if (!response.data || !response.data.token) {
+        throw new Error('Invalid refresh token response');
       }
+
+      const { token, refreshToken: newRefreshToken } = response.data;
+      
+      localStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       if (newRefreshToken) {
         localStorage.setItem('refreshToken', newRefreshToken);
@@ -88,7 +89,6 @@ api.interceptors.response.use(
       processQueue(error);
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
       return Promise.reject(error);
     } finally {
       isRefreshing = false;
@@ -200,32 +200,16 @@ export const resetPassword = async (token, newPassword) => {
   }
 };
 
-export const refreshToken = async () => {
+export const refreshToken = async ({ refreshToken }) => {
   try {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
+    const response = await api.post('/auth/refresh', { refreshToken });
+    if (!response.data || !response.data.token) {
+      throw new Error('Invalid refresh token response');
     }
-
-    const response = await api.post('/auth/refresh-token', { refreshToken });
-    
-    // Save the new access token
-    if (response.data.accessToken) {
-      localStorage.setItem('token', response.data.accessToken);
-    }
-    
-    // Save the new refresh token if it exists
-    if (response.data.refreshToken) {
-      localStorage.setItem('refreshToken', response.data.refreshToken);
-    }
-    
-    return response.data.accessToken;
+    return response.data;
   } catch (error) {
-    console.error('Token refresh error:', error);
-    // Clear tokens on refresh failure
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    throw new Error('Session expired. Please log in again.');
+    console.error('Error refreshing token:', error);
+    throw error;
   }
 };
 

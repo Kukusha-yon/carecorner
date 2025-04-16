@@ -38,7 +38,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
       console.log('Added Authorization header');
     } else {
-      console.error('No token available for request to:', config.url);
+      // Don't log error for public routes
+      const isPublicRoute = publicRoutes.some(route => config.url.includes(route));
+      if (!isPublicRoute) {
+        console.warn('No token available for request to:', config.url);
+      }
     }
     return config;
   },
@@ -89,10 +93,9 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
           console.error('No refresh token available');
-          // Clear all auth data and redirect to login
+          // Clear all auth data but don't redirect - let the AuthContext handle it
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
           throw new Error('No refresh token available');
         }
         
@@ -101,28 +104,27 @@ api.interceptors.response.use(
           refreshToken
         });
         
-        if (!response.data || !response.data.accessToken) {
+        if (response.data && response.data.accessToken) {
+          // Store the new tokens
+          localStorage.setItem('token', response.data.accessToken);
+          if (response.data.refreshToken) {
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+          }
+          
+          // Update the Authorization header
+          originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
+          
+          // Retry the original request
+          return api(originalRequest);
+        } else {
           throw new Error('Invalid refresh token response');
         }
-        
-        // Store the new tokens
-        localStorage.setItem('token', response.data.accessToken);
-        if (response.data.refreshToken) {
-          localStorage.setItem('refreshToken', response.data.refreshToken);
-        }
-        
-        // Update the Authorization header
-        originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
-        
-        // Retry the original request
-        return api(originalRequest);
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Clear all auth data and redirect to login
+        // Clear tokens but don't redirect - let the AuthContext handle it
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+        return Promise.reject(error);
       }
     }
     
@@ -136,4 +138,5 @@ api.interceptors.response.use(
   }
 );
 
+// Export the api instance
 export { api }; 

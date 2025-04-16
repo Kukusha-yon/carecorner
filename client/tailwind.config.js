@@ -51,7 +51,4 @@ export default {
   experimental: {
     optimizeUniversalDefaults: true,
   },
-  plugins: [
-    require('@tailwindcss/aspect-ratio'),
-  ],
 } 
