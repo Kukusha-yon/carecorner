@@ -1,93 +1,115 @@
 # CareCorner
 
-CareCorner is a modern e-commerce platform for electronics and gadgets.
+CareCorner is an e-commerce platform for electronics products.
 
-## Features
+## Project Structure
 
-- User authentication and authorization
-- Product browsing and searching
-- Shopping cart functionality
-- Order management
-- Admin dashboard
-- Responsive design for all devices
+- `client/`: Frontend React application
+- `server/`: Backend Node.js/Express application
 
-## Getting Started
+## Development
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js (v18 or higher)
+- npm (v8 or higher)
 - MongoDB
 
-### Installation
+### Client Setup
 
-1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/carecorner.git
-cd carecorner
-```
+# Navigate to the client directory
+cd client
 
-2. Install dependencies
-```bash
-# Install server dependencies
-cd server
+# Install dependencies
 npm install
 
-# Install client dependencies
-cd ../client
-npm install
-```
-
-3. Set up environment variables
-   - Create a `.env` file in the server directory with the following variables:
-   ```
-   PORT=5001
-   MONGODB_URI=your_mongodb_uri
-   JWT_SECRET=your_jwt_secret
-   ```
-   
-   - Create a `.env` file in the client directory with the following variables:
-   ```
-   VITE_API_URL=http://localhost:5001/api
-   VITE_ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
-   VITE_NEWS_API_KEY=your_news_api_key
-   ```
-
-4. Start the development servers
-```bash
-# Start the server
-cd server
-npm run dev
-
-# Start the client
-cd ../client
+# Start the development server
 npm run dev
 ```
 
-5. Open your browser and navigate to `http://localhost:3000`
+### Server Setup
 
-## API Keys
+```bash
+# Navigate to the server directory
+cd server
 
-### Alpha Vantage API
-To get real-time stock data, you need an API key from Alpha Vantage:
-1. Sign up at [Alpha Vantage](https://www.alphavantage.co/support/#api-key)
-2. Copy your API key
-3. Add it to your client `.env` file as `VITE_ALPHA_VANTAGE_API_KEY`
+# Install dependencies
+npm install
 
-### News API
-To get technology news, you need an API key from NewsData.io:
-1. Sign up at [NewsData.io](https://newsdata.io/)
-2. Copy your API key
-3. Add it to your client `.env` file as `VITE_NEWS_API_KEY`
+# Start the development server
+npm run dev
+```
 
-## Deployment
+## Production Deployment
 
-### Server
-The server can be deployed to any platform that supports Node.js applications, such as Heroku, Vercel, or AWS.
+### Client Deployment
+
+```bash
+# Navigate to the client directory
+cd client
+
+# Run the production build script
+./build.sh
+
+# The build output will be in the 'dist' directory
+```
+
+### Server Deployment
+
+```bash
+# Navigate to the server directory
+cd server
+
+# Run the production build script
+./build.sh
+
+# Deploy to Vercel
+vercel --prod
+```
+
+## Environment Variables
 
 ### Client
-The client can be deployed to any static hosting service, such as Netlify, Vercel, or GitHub Pages.
+
+Create a `.env.production` file in the client directory with the following variables:
+
+```
+VITE_API_URL=https://your-api-url.com/api
+VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
+VITE_APP_NAME=CareCorner
+VITE_APP_DESCRIPTION=Your one-stop shop for electronics
+VITE_APP_VERSION=1.0.0
+```
+
+### Server
+
+Create a `.env.production` file in the server directory with the following variables:
+
+```
+PORT=5001
+NODE_ENV=production
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=30d
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
+JWT_REFRESH_EXPIRE=7d
+ADMIN_EMAIL=admin@carecorner.com
+ADMIN_PASSWORD=admin123
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_password
+SMTP_FROM=noreply@carecorner.com
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLIENT_URL=https://your-client-url.com
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_api_key
+NEWSDATA_API_KEY=your_newsdata_api_key
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+ISC 

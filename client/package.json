@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:prod": "vite build --mode production",
+    "analyze": "vite-bundle-visualizer"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
@@ -42,6 +44,7 @@
     "autoprefixer": "^10.4.18",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.17",
-    "vite": "^5.1.6"
+    "vite": "^5.1.6",
+    "vite-bundle-visualizer": "^0.9.0"
   }
 }

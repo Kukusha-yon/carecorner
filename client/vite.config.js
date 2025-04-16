@@ -18,13 +18,24 @@ export default defineConfig({
     },
   },
   build: {
-    sourcemap: true,
+    sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@headlessui/react', '@heroicons/react', 'framer-motion'],
+          charts: ['chart.js', 'react-chartjs-2', 'recharts'],
+          forms: ['formik', 'yup']
         },
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
 })
