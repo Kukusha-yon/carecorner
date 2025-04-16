@@ -1,42 +1,41 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { visualizer } from 'rollup-plugin-visualizer'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    react(),
     tailwindcss(),
-    react()
+    visualizer({
+      filename: './dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'https://carecorner-az5h51aua-yonatans-projects-2f1159da.vercel.app',
-        changeOrigin: true,
-        secure: true
-      },
-    },
-  },
   build: {
-    sourcemap: false,
+    outDir: 'dist',
+    sourcemap: true,
     minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@headlessui/react', '@heroicons/react', 'framer-motion'],
-          charts: ['chart.js', 'react-chartjs-2', 'recharts'],
-          forms: ['formik', 'yup']
+          ui: ['@headlessui/react', '@heroicons/react'],
         },
       },
     },
-    chunkSizeWarningLimit: 2000,
-  }
+  },
+  server: {
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
