@@ -1,9 +1,15 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useEffect } from 'react';
 
 const AdminRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, checkAuth } = useAuth();
   const location = useLocation();
+
+  // Check authentication when route changes
+  useEffect(() => {
+    checkAuth();
+  }, [location.pathname, checkAuth]);
 
   if (loading) {
     return (

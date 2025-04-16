@@ -6,7 +6,8 @@ import {
   register as registerService,
   logout as logoutService,
   updateProfile as updateProfileService,
-  changePassword as changePasswordService
+  changePassword as changePasswordService,
+  refreshToken as refreshTokenService
 } from '../services/authService';
 import toast from 'react-hot-toast';
 
@@ -43,14 +44,50 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       
-      console.log('Token found, verifying with server...');
-      const user = await getCurrentUserService();
-      
-      if (user && user._id) {
-        console.log('User authenticated successfully:', user.email, 'Role:', user.role);
-        setUser(user);
-      } else {
-        console.log('Server returned invalid user data');
+      try {
+        console.log('Token found, verifying with server...');
+        const user = await getCurrentUserService();
+        
+        if (user && user._id) {
+          console.log('User authenticated successfully:', user.email, 'Role:', user.role);
+          setUser(user);
+        } else {
+          console.log('Server returned invalid user data');
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error getting current user:', error);
+        
+        // If we have a refresh token, try to refresh the access token
+        if (refreshToken && error.response?.status === 401) {
+          try {
+            console.log('Attempting to refresh token...');
+            const response = await refreshTokenService({ refreshToken });
+            
+            if (response && response.accessToken) {
+              console.log('Token refreshed successfully');
+              localStorage.setItem('token', response.accessToken);
+              
+              if (response.refreshToken) {
+                localStorage.setItem('refreshToken', response.refreshToken);
+              }
+              
+              // Try to get the user again with the new token
+              const user = await getCurrentUserService();
+              if (user && user._id) {
+                console.log('User authenticated successfully after token refresh:', user.email, 'Role:', user.role);
+                setUser(user);
+                return;
+              }
+            }
+          } catch (refreshError) {
+            console.error('Token refresh failed:', refreshError);
+            // Clear tokens on refresh failure
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+          }
+        }
+        
         setUser(null);
       }
     } catch (error) {
@@ -131,7 +168,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    changePassword
+    changePassword,
+    checkAuth
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
