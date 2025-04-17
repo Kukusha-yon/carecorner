@@ -8,40 +8,58 @@ import mongoose from 'mongoose';
 // @route   GET /api/featured-products
 // @access  Public
 export const getFeaturedProducts = asyncHandler(async (req, res) => {
-  const includeInactive = req.query.includeInactive === 'true';
-  const query = includeInactive ? {} : { isActive: true };
-  
-  const featuredProducts = await FeaturedProduct.find(query)
-    .sort({ order: 1 })
-    .populate('productId');
-
-  const formattedProducts = featuredProducts.map(product => {
-    if (!product.productId) {
-      return null;
-    }
-    return {
-      _id: product._id,
-      productId: product.productId._id,
-      name: product.productId.name,
-      price: product.productId.price,
-      description: product.productId.description,
-      image: product.productId.image,
-      featuredTitle: product.title,
-      featuredDescription: product.description,
-      featuredImage: product.image,
-      featuredGalleryImages: product.galleryImages,
-      featuredOrder: product.order,
-      featuredButtonText: product.buttonText,
-      featuredHighlightText: product.highlightText,
-      category: product.productId.category,
-      isActive: product.isActive,
-      startDate: product.startDate,
-      endDate: product.endDate,
-      createdAt: product.createdAt
-    };
-  }).filter(Boolean); // Remove any null entries
-
-  res.json(formattedProducts);
+  try {
+    console.log('Fetching featured products with query:', req.query);
+    
+    const includeInactive = req.query.includeInactive === 'true';
+    const query = includeInactive ? {} : { isActive: true };
+    
+    console.log('Featured products query:', query);
+    
+    const featuredProducts = await FeaturedProduct.find(query)
+      .sort({ order: 1 })
+      .populate('productId');
+    
+    console.log(`Found ${featuredProducts.length} featured products`);
+    
+    const formattedProducts = featuredProducts.map(product => {
+      if (!product.productId) {
+        console.log('Featured product has no associated product:', product._id);
+        return null;
+      }
+      return {
+        _id: product._id,
+        productId: product.productId._id,
+        name: product.productId.name,
+        price: product.productId.price,
+        description: product.productId.description,
+        image: product.productId.image,
+        featuredTitle: product.title,
+        featuredDescription: product.description,
+        featuredImage: product.image,
+        featuredGalleryImages: product.galleryImages,
+        featuredOrder: product.order,
+        featuredButtonText: product.buttonText,
+        featuredHighlightText: product.highlightText,
+        category: product.productId.category,
+        isActive: product.isActive,
+        startDate: product.startDate,
+        endDate: product.endDate,
+        createdAt: product.createdAt
+      };
+    }).filter(Boolean); // Remove any null entries
+    
+    console.log(`Returning ${formattedProducts.length} formatted featured products`);
+    
+    res.json(formattedProducts);
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    res.status(500).json({ 
+      message: 'Error fetching featured products',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
 // @desc    Get a featured product by ID

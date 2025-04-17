@@ -17,6 +17,11 @@ router.get('/', getAllNewArrivals);
 
 // Admin routes - must come before /:id route
 router.get('/admin', protect, admin, getAdminNewArrivals);
+
+// Public route for getting a single new arrival
+router.get('/:id', getNewArrivalById);
+
+// Admin routes for creating, updating, and deleting
 router.post('/', protect, admin, upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'galleryImages', maxCount: 10 }
@@ -26,8 +31,5 @@ router.put('/:id', protect, admin, upload.fields([
   { name: 'galleryImages', maxCount: 10 }
 ]), updateNewArrival);
 router.delete('/:id', protect, admin, deleteNewArrival);
-
-// Public route for getting a single new arrival
-router.get('/:id', getNewArrivalById);
 
 export default router; 

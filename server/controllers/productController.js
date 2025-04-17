@@ -9,48 +9,47 @@ import FeaturedProduct from '../models/FeaturedProduct.js';
 // @route   GET /api/products
 // @access  Public
 export const getProducts = asyncHandler(async (req, res) => {
-  console.log('getProducts called with query:', req.query);
-  
-  const pageSize = req.query.admin === 'true' ? 1000 : 10;
-  const page = Number(req.query.page) || 1;
-  const keyword = req.query.keyword
-    ? {
-        name: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {};
-
-  const category = req.query.category ? { category: req.query.category } : {};
-
-  console.log('Search criteria:', { ...keyword, ...category });
-  console.log('Page size:', pageSize);
-  console.log('Page:', page);
-  
   try {
-    const count = await Product.countDocuments({ ...keyword, ...category });
-    console.log('Product count:', count);
+    console.log('Fetching products with query:', req.query);
     
-    const products = await Product.find({ ...keyword, ...category })
-      .sort({ createdAt: -1 })
-      .limit(pageSize)
-      .skip(pageSize * (page - 1));
+    const { category, sort, search } = req.query;
+    let query = {};
     
-    console.log('Products found:', products.length);
-    console.log('First product:', products[0]);
+    if (category) {
+      query.category = category;
+    }
     
-    res.json({
-      products,
-      page,
-      pages: Math.ceil(count / pageSize),
-      total: count,
-    });
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    console.log('Products query:', query);
+    
+    let sortOption = {};
+    if (sort === 'price-asc') {
+      sortOption = { price: 1 };
+    } else if (sort === 'price-desc') {
+      sortOption = { price: -1 };
+    } else if (sort === 'newest') {
+      sortOption = { createdAt: -1 };
+    }
+    
+    console.log('Sort option:', sortOption);
+    
+    const products = await Product.find(query).sort(sortOption);
+    
+    console.log(`Found ${products.length} products`);
+    
+    res.json(products);
   } catch (error) {
-    console.error('Error in getProducts:', error);
+    console.error('Error fetching products:', error);
     res.status(500).json({ 
       message: 'Error fetching products',
-      error: error.message 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });

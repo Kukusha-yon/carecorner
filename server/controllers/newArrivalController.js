@@ -10,12 +10,21 @@ import mongoose from 'mongoose';
 const getAllNewArrivals = asyncHandler(async (req, res) => {
   console.log('Fetching all new arrivals...');
   
-  const newArrivals = await NewArrival.find()
-    .sort({ createdAt: -1 });
-  
-  console.log(`Found ${newArrivals.length} new arrivals:`, newArrivals);
-  
-  res.status(200).json(newArrivals);
+  try {
+    const newArrivals = await NewArrival.find()
+      .sort({ createdAt: -1 });
+    
+    console.log(`Found ${newArrivals.length} new arrivals:`, newArrivals);
+    
+    res.status(200).json(newArrivals);
+  } catch (error) {
+    console.error('Error fetching new arrivals:', error);
+    res.status(500).json({ 
+      message: 'Error fetching new arrivals',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
 });
 
 // @desc    Get a single new arrival by ID
