@@ -58,11 +58,13 @@ app.use(helmet({
 
 // CORS configuration
 app.use(cors({
-  origin: [
-    'https://carecorner-bl2n.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        'https://carecorner-bl2n.vercel.app',
+        'https://carecorner-phi.vercel.app',
+        'https://carecorner-qb12nr5ne-yonatans-projects-2f1159da.vercel.app'
+      ] 
+    : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

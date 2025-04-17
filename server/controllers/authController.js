@@ -52,9 +52,11 @@ const isPasswordComplex = (password) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt for:', email);
 
     // Validate input
     if (!email || !password) {
+      console.log('Login failed: Missing email or password');
       return res.status(400).json({
         success: false,
         message: 'Please provide email and password'
@@ -65,6 +67,7 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
+      console.log('Login failed: User not found for email:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -75,9 +78,19 @@ export const login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
 
     if (!isMatch) {
+      console.log('Login failed: Invalid password for user:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
+      });
+    }
+
+    // Check if JWT secret is available
+    if (!process.env.JWT_SECRET) {
+      console.error('Login failed: JWT_SECRET is not defined');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error'
       });
     }
 
@@ -87,6 +100,15 @@ export const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE }
     );
+
+    // Check if refresh token secret is available
+    if (!process.env.JWT_REFRESH_SECRET) {
+      console.error('Login failed: JWT_REFRESH_SECRET is not defined');
+      return res.status(500).json({
+        success: false,
+        message: 'Server configuration error'
+      });
+    }
 
     // Generate refresh token
     const refreshToken = jwt.sign(
@@ -99,9 +121,11 @@ export const login = async (req, res) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
+
+    console.log('Login successful for user:', email);
 
     // Return user data and token
     return res.status(200).json({
@@ -116,9 +140,11 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    console.error('Error stack:', error.stack);
     return res.status(500).json({
       success: false,
-      message: 'Server error during login'
+      message: 'Server error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

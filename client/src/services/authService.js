@@ -3,14 +3,19 @@ import api from './api';
 // Login user
 export const login = async (email, password) => {
   try {
+    console.log('Attempting login for:', email);
+    
     const response = await api.post('/auth/login', { email, password });
+    console.log('Login response received:', response.status);
     
     // Check if response has the expected structure
     if (response.data && response.data.token) {
+      console.log('Login successful, storing token');
       localStorage.setItem('token', response.data.token);
       
       // Only store user data if it exists
       if (response.data.user) {
+        console.log('Storing user data');
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
       
@@ -21,7 +26,30 @@ export const login = async (email, password) => {
     }
   } catch (error) {
     console.error('Login error:', error);
-    throw error;
+    
+    // Provide more detailed error information
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+      
+      // Create a more informative error message
+      const errorMessage = error.response.data?.message || 'Authentication failed';
+      const enhancedError = new Error(errorMessage);
+      enhancedError.status = error.response.status;
+      enhancedError.data = error.response.data;
+      throw enhancedError;
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+      throw new Error('No response from server. Please check your connection.');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error setting up request:', error.message);
+      throw error;
+    }
   }
 };
 
