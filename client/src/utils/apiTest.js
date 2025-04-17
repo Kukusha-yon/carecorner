@@ -7,16 +7,10 @@ import axios from 'axios';
 export const testApiConnection = async () => {
   try {
     // Get the API URL from environment variables or use a default
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 
+      (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
     
     console.log('Testing API connection to:', apiUrl);
-    
-    // Try to access the root endpoint
-    const rootResponse = await axios.get('https://carecorner-phi.vercel.app/', {
-      timeout: 5000
-    });
-    
-    console.log('Root response:', rootResponse.data);
     
     // Try to access the health endpoint
     const healthResponse = await axios.get(`${apiUrl}/health`, {
@@ -27,12 +21,10 @@ export const testApiConnection = async () => {
     
     return {
       success: true,
-      rootData: rootResponse.data,
-      healthData: healthResponse.data
+      data: healthResponse.data
     };
   } catch (error) {
     console.error('API connection test failed:', error.message);
-    console.error('Error details:', error.response?.data);
     
     return {
       success: false,

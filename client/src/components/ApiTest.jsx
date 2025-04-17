@@ -48,30 +48,27 @@ const ApiTest = () => {
         <div className="p-4 bg-gray-100 rounded">
           <h3 className="font-bold mb-2">Test Result:</h3>
           <p className="mb-2">
-            <span className="font-semibold">Success:</span> {testResult.success ? 'Yes' : 'No'}
-          </p>
-          <p className="mb-2">
-            <span className="font-semibold">API URL:</span> {testResult.apiUrl}
+            Status: <span className={testResult.success ? "text-green-600" : "text-red-600"}>
+              {testResult.success ? "Success" : "Failed"}
+            </span>
           </p>
           
           {testResult.success ? (
             <div>
-              <h4 className="font-semibold mt-4 mb-2">Health Check Response:</h4>
-              <pre className="bg-gray-200 p-2 rounded overflow-auto max-h-40">
-                {JSON.stringify(testResult.health, null, 2)}
-              </pre>
-              
-              <h4 className="font-semibold mt-4 mb-2">Products Response:</h4>
-              <pre className="bg-gray-200 p-2 rounded overflow-auto max-h-40">
-                {JSON.stringify(testResult.products, null, 2)}
+              <p className="font-semibold">Response Data:</p>
+              <pre className="bg-gray-200 p-2 rounded mt-1 overflow-auto max-h-60">
+                {JSON.stringify(testResult.data, null, 2)}
               </pre>
             </div>
           ) : (
             <div>
-              <h4 className="font-semibold mt-4 mb-2">Error Details:</h4>
-              <pre className="bg-gray-200 p-2 rounded overflow-auto max-h-40">
-                {JSON.stringify(testResult.error, null, 2)}
-              </pre>
+              <p className="font-semibold">Error Details:</p>
+              <p className="text-red-600">{testResult.error}</p>
+              {testResult.details && (
+                <pre className="bg-gray-200 p-2 rounded mt-1 overflow-auto max-h-60">
+                  {JSON.stringify(testResult.details, null, 2)}
+                </pre>
+              )}
             </div>
           )}
         </div>

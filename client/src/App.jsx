@@ -11,8 +11,6 @@ import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
-import checkEnvironmentVariables from './utils/envCheck';
-import testApiConnection from './utils/testApiConnection';
 
 const Home = lazy(() => import('./pages/Home'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
@@ -166,28 +164,14 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-  const [apiHealthy, setApiHealthy] = useState(true);
-  const [apiError, setApiError] = useState(null);
   const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
     (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
   
-  // Check environment variables and API health on app initialization
+  // Log API URL for debugging
   useEffect(() => {
-    const initializeApp = async () => {
-      // Check environment variables
-      checkEnvironmentVariables();
-      
-      // Test API connection
-      const apiTestResult = await testApiConnection();
-      if (!apiTestResult.success) {
-        console.error('API connection test failed:', apiTestResult.error);
-        setApiHealthy(false);
-        setApiError(`API connection error: ${apiTestResult.error}`);
-      }
-    };
-    
-    initializeApp();
-  }, []);
+    console.log('API URL:', apiUrl);
+    console.log('Environment:', import.meta.env.MODE);
+  }, [apiUrl]);
 
   return (
     <ErrorBoundary>
@@ -197,14 +181,6 @@ const App = () => {
             <CartProvider>
               <ScrollToTop />
               <div className="min-h-screen bg-gray-50">
-                {!apiHealthy && (
-                  <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-                    <p className="font-bold">API Connection Issue</p>
-                    <p>We're having trouble connecting to our servers. Some features may not work correctly.</p>
-                    {apiError && <p className="text-sm mt-1">{apiError}</p>}
-                    <p className="text-sm mt-1">API URL: {apiUrl}</p>
-                  </div>
-                )}
                 <AnimatedRoutes />
                 <Toaster position="top-right" />
               </div>
