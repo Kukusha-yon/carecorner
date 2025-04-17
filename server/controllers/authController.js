@@ -52,75 +52,78 @@ const isPasswordComplex = (password) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt for:', email);
 
-    // Find user and explicitly select the password field
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Check if account is locked
-    if (user.isLocked && user.lockUntil > Date.now()) {
-      return res.status(403).json({ 
-        message: 'Account is locked. Please try again later.',
-        lockUntil: user.lockUntil
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password'
       });
     }
 
-    // Verify password
-    const isMatch = await user.comparePassword(password);
+    // Find user by email
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Check if password matches
+    const isMatch = await user.matchPassword(password);
+
     if (!isMatch) {
-      // Increment failed attempts
-      user.failedLoginAttempts += 1;
-      
-      // Lock account if too many failed attempts
-      if (user.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS) {
-        user.isLocked = true;
-        user.lockUntil = Date.now() + LOCK_TIME;
-      }
-      
-      await user.save();
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
     }
 
-    // Reset failed attempts on successful login
-    user.failedLoginAttempts = 0;
-    user.isLocked = false;
-    user.lockUntil = null;
-    await user.save();
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE }
+    );
 
-    // Auto-verify email if not verified
-    if (!user.isEmailVerified) {
-      console.log('Auto-verifying email for user:', email);
-      user.isEmailVerified = true;
-      await user.save();
-    }
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRE }
+    );
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    // Set refresh token in HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
-    // Save refresh token
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Set CORS headers explicitly
+    res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://carecorner-bl2n.vercel.app');
+    res.header('Access-Control-Allow-Credentials', 'true');
 
-    const response = {
+    // Return user data and token
+    return res.status(200).json({
+      success: true,
+      token,
       user: {
-        _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role
-      },
-      accessToken,
-      refreshToken
-    };
-
-    console.log('Login successful for user:', email, 'Role:', user.role);
-    res.json(response);
+      }
+    });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'An error occurred during login' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during login'
+    });
   }
 };
 

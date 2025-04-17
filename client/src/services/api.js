@@ -12,6 +12,7 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json'
   },
   withCredentials: true, // Important for CORS with credentials
   timeout: 10000, // 10 seconds timeout
@@ -20,10 +21,17 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Add origin header for CORS
+    config.headers['Origin'] = window.location.origin;
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log request for debugging
+    console.log(`Making ${config.method.toUpperCase()} request to: ${config.url}`);
+    
     return config;
   },
   (error) => {
@@ -34,9 +42,22 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful responses
+    console.log(`Response from ${response.config.url}:`, response.status);
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+    
+    // Log the error for debugging
+    console.error('API Error:', {
+      url: originalRequest.url,
+      method: originalRequest.method,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
     
     // If error is 401 and we haven't tried to refresh token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -45,7 +66,10 @@ api.interceptors.response.use(
       try {
         // Try to refresh token
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {}, {
-          withCredentials: true
+          withCredentials: true,
+          headers: {
+            'Origin': window.location.origin
+          }
         });
         
         if (response.data && response.data.token) {
@@ -69,14 +93,6 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-    
-    // Log the error for debugging
-    console.error('API Error:', {
-      url: originalRequest.url,
-      method: originalRequest.method,
-      status: error.response?.status,
-      message: error.message
-    });
     
     return Promise.reject(error);
   }
