@@ -15,11 +15,13 @@ router.get('/', async (req, res) => {
     
     // Get server information
     const serverInfo = {
-      status: 'healthy',
+      status: dbStatus === 'connected' ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       environment: env,
       version: '1.0.0',
-      message: 'API is healthy and responding correctly',
+      message: dbStatus === 'connected' 
+        ? 'API is healthy and responding correctly' 
+        : 'API is responding but database connection is not established',
       database: {
         status: dbStatus,
         host: mongoose.connection.host || 'unknown',
@@ -48,12 +50,16 @@ router.get('/', async (req, res) => {
       }
     };
     
+    // Return 200 even if database is not connected
+    // This allows the API to respond even if there are database issues
     res.status(200).json(serverInfo);
   } catch (error) {
     console.error('Health check error:', error);
-    res.status(500).json({
+    // Return 200 even on error to ensure the health check endpoint always responds
+    res.status(200).json({
       status: 'error',
       timestamp: new Date().toISOString(),
+      message: 'Health check encountered an error but API is still responding',
       error: {
         message: error.message,
         stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

@@ -31,7 +31,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Connect to MongoDB
-connectDB();
+let dbConnection;
+try {
+  dbConnection = await connectDB();
+  console.log('MongoDB connection established successfully');
+} catch (error) {
+  console.error('Failed to connect to MongoDB:', error);
+  // Don't exit, let the app continue and handle errors through middleware
+}
 
 // Enable trust proxy for Vercel
 app.set('trust proxy', 1);

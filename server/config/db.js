@@ -3,36 +3,47 @@ dotenv.config();
 
 import mongoose from 'mongoose';
 
+// Cache the connection to avoid creating multiple connections in serverless environment
+let cachedConnection = null;
+
 const connectDB = async () => {
+  // If we already have a connection, return it
+  if (cachedConnection) {
+    console.log('Using cached MongoDB connection');
+    return cachedConnection;
+  }
+
   try {
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI:', process.env.MONGODB_URI);
+    
+    // Don't log the full URI for security reasons
+    const uriParts = process.env.MONGODB_URI ? process.env.MONGODB_URI.split('@') : [];
+    const sanitizedUri = uriParts.length > 1 
+      ? `mongodb+srv://****:****@${uriParts[1]}` 
+      : 'mongodb+srv://****:****@****';
+    
+    console.log('MongoDB URI (sanitized):', sanitizedUri);
     
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased timeout
       socketTimeoutMS: 45000,
+      maxPoolSize: 10, // Limit connection pool size
+      minPoolSize: 0, // Allow pool to scale down to zero
+      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
+      connectTimeoutMS: 10000, // Connection timeout
+      retryWrites: true,
+      retryReads: true
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     console.log('Database name:', conn.connection.name);
     console.log('MongoDB connection state:', conn.connection.readyState);
     
-    // List all collections in the database
-    const collections = await conn.connection.db.listCollections().toArray();
-    console.log('Collections in database:', collections.map(c => c.name));
+    // Cache the connection
+    cachedConnection = conn;
     
-    // Check if the products collection exists
-    const productsCollection = collections.find(c => c.name === 'products');
-    console.log('Products collection exists:', !!productsCollection);
-    
-    // If the products collection exists, count the documents
-    if (productsCollection) {
-      const count = await conn.connection.db.collection('products').countDocuments();
-      console.log('Number of products:', count);
-    }
-
     // Handle connection errors after initial connection
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err);
@@ -42,28 +53,14 @@ const connectDB = async () => {
         code: err.code,
         codeName: err.codeName
       });
-      setTimeout(connectDB, 5000);
+      // Don't try to reconnect in serverless environment
+      // Just log the error and let the function timeout
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected. Attempting to reconnect...');
-      setTimeout(connectDB, 5000);
-    });
-
-    mongoose.connection.on('reconnected', () => {
-      console.log('MongoDB reconnected');
-    });
-
-    // Handle process termination
-    process.on('SIGINT', async () => {
-      try {
-        await mongoose.connection.close();
-        console.log('MongoDB connection closed through app termination');
-        process.exit(0);
-      } catch (err) {
-        console.error('Error closing MongoDB connection:', err);
-        process.exit(1);
-      }
+      console.log('MongoDB disconnected');
+      // Don't try to reconnect in serverless environment
+      // Just log the disconnection and let the function timeout
     });
 
     return conn;
@@ -75,8 +72,8 @@ const connectDB = async () => {
       code: error.code,
       codeName: error.codeName
     });
-    // Instead of exiting, we'll throw the error to be handled by the application
-    setTimeout(connectDB, 5000);
+    // In serverless environment, we don't want to retry indefinitely
+    // Just throw the error to be handled by the error middleware
     throw error;
   }
 };

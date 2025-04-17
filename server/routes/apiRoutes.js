@@ -17,6 +17,25 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to all routes
 router.use(apiLimiter);
 
+// Simple test endpoint
+router.get('/test', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API test endpoint is working',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    request: {
+      ip: req.ip,
+      method: req.method,
+      url: req.originalUrl,
+      headers: {
+        host: req.headers.host,
+        'user-agent': req.headers['user-agent']
+      }
+    }
+  });
+});
+
 // Alpha Vantage API endpoint - Public route
 router.get('/stock-data', async (req, res) => {
   try {
