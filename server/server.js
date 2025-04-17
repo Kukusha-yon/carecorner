@@ -47,7 +47,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5001", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-bl2n.vercel.app", "https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app"],
+      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5001", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-bl2n.vercel.app", "https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app", "https://carecorner-bl2n-ch67jcegb-yonatans-projects-2f1159da.vercel.app", "https://carecorner-phi.vercel.app"],
       fontSrc: ["'self'", "https:", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
@@ -64,7 +64,9 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:5001',
     'https://carecorner-bl2n.vercel.app',
-    'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app'
+    'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app',
+    'https://carecorner-bl2n-ch67jcegb-yonatans-projects-2f1159da.vercel.app',
+    'https://carecorner-phi.vercel.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
