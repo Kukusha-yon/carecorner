@@ -13,6 +13,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import checkEnvironmentVariables from './utils/envCheck';
 import checkApiHealth from './services/healthService';
+import testApiConnection from './utils/testApiConnection';
 
 
 
@@ -169,12 +170,24 @@ const AnimatedRoutes = () => {
 
 const App = () => {
   const [apiHealthy, setApiHealthy] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
+    (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
   
   // Check environment variables and API health on app initialization
   useEffect(() => {
     const initializeApp = async () => {
       // Check environment variables
       checkEnvironmentVariables();
+      
+      // Test API connection
+      const apiTestResult = await testApiConnection(apiUrl);
+      if (!apiTestResult.success) {
+        console.error('API connection test failed:', apiTestResult.error);
+        setApiHealthy(false);
+        setApiError(`API connection error: ${apiTestResult.error.message}`);
+        return;
+      }
       
       // Check API health
       try {
@@ -183,15 +196,17 @@ const App = () => {
         
         if (!isHealthy) {
           console.error('API is not healthy. Some features may not work correctly.');
+          setApiError('API is not responding correctly. Please try again later.');
         }
       } catch (error) {
         console.error('Failed to check API health:', error);
         setApiHealthy(false);
+        setApiError(`API connection error: ${error.message}`);
       }
     };
     
     initializeApp();
-  }, []);
+  }, [apiUrl]);
 
   return (
     <ErrorBoundary>
@@ -205,6 +220,8 @@ const App = () => {
                   <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
                     <p className="font-bold">API Connection Issue</p>
                     <p>We're having trouble connecting to our servers. Some features may not work correctly.</p>
+                    {apiError && <p className="text-sm mt-1">{apiError}</p>}
+                    <p className="text-sm mt-1">API URL: {apiUrl}</p>
                   </div>
                 )}
                 <AnimatedRoutes />

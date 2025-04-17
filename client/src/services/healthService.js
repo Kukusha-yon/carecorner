@@ -14,6 +14,17 @@ const checkApiHealth = async () => {
     return response.data?.status === 'ok';
   } catch (error) {
     console.error('API health check failed:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        method: error.config?.method
+      }
+    });
     return false;
   }
 };
