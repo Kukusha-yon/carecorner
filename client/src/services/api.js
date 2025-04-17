@@ -3,6 +3,10 @@ import axios from 'axios';
 // Get the API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL;
 
+if (!API_URL) {
+  console.error('VITE_API_URL is not defined in environment variables');
+}
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
@@ -16,6 +20,9 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
+    // Log the request URL for debugging
+    console.log(`Making request to: ${config.baseURL}${config.url}`);
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -30,8 +37,19 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful responses for debugging
+    console.log(`Response from ${response.config.url}:`, response.status);
+    return response;
+  },
   async (error) => {
+    console.error('Response error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+
     const originalRequest = error.config;
 
     // If error is 401 and we haven't tried to refresh token yet
@@ -53,6 +71,7 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return api(originalRequest);
       } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
         // If refresh token fails, clear storage and redirect to login
         localStorage.removeItem('token');
         localStorage.removeItem('user');

@@ -1,41 +1,24 @@
-import axios from 'axios';
+import api from '../services/api';
 
 /**
- * Tests the API connection by making a request to the products endpoint
- * @param {string} apiUrl - The API URL to test
- * @returns {Promise<Object>} - The result of the test
+ * Tests the API connection by making a request to the health endpoint
+ * @returns {Promise<boolean>} - The result of the test
  */
-const testApiConnection = async (apiUrl) => {
+export const testApiConnection = async () => {
   try {
-    console.log('Testing API connection to:', apiUrl);
+    console.log('Testing API connection to:', import.meta.env.VITE_API_URL);
     
-    // Test the products endpoint instead of health
-    const response = await axios.get(`${apiUrl}/products`, {
-      timeout: 5000,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    });
-    
+    // Test the health endpoint
+    const response = await api.get('/health');
     console.log('API connection test successful:', response.data);
-    
-    return {
-      success: true,
-      data: response.data
-    };
+    return true;
   } catch (error) {
-    console.error('API connection test failed:', error);
-    
-    return {
-      success: false,
-      error: {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data
-      }
-    };
+    console.error('API connection test failed:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    return false;
   }
 };
 
