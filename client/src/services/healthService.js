@@ -1,4 +1,4 @@
-import api from './api';
+import { api } from './api';
 
 /**
  * Checks if the API is available and responding correctly

@@ -42,6 +42,7 @@
     "@types/react-dom": "^18.2.21",
     "@vitejs/plugin-react": "^4.2.1",
     "esbuild": "^0.20.1",
+    "rollup-plugin-visualizer": "^5.12.0",
     "vite": "^5.1.6",
     "vite-bundle-visualizer": "^0.9.0"
   }

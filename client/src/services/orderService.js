@@ -1,4 +1,4 @@
-import { api } from './api.js';
+import { api } from './api';
 
 // Get user orders
 export const getUserOrders = async () => {
