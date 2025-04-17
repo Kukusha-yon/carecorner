@@ -5,8 +5,11 @@ import axios from 'axios';
  * @returns {Promise<Object>} - The result of the test
  */
 export const testApi = async () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
+  // Clean and normalize the API URL
+  const apiUrl = (import.meta.env.VITE_API_URL || 
+    (import.meta.env.PROD ? 'https://carecorner-bl2n.vercel.app/api' : 'http://localhost:5001/api'))
+    .trim()
+    .replace(/\/+$/, ''); // Remove trailing slashes
   
   console.log('Testing API at:', apiUrl);
   
