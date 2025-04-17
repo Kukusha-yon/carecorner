@@ -5,11 +5,8 @@ import axios from 'axios';
  * @returns {Promise<Object>} - The result of the test
  */
 export const testApi = async () => {
-  // Clean and normalize the API URL
-  const apiUrl = (import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://carecorner-bl2n.vercel.app/api' : 'http://localhost:5001/api'))
-    .trim()
-    .replace(/\/+$/, ''); // Remove trailing slashes
+  // Use a direct API URL that bypasses the frontend
+  const apiUrl = 'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app/api';
   
   console.log('Testing API at:', apiUrl);
   

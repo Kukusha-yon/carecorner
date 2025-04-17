@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-// Get the API URL from environment variables, with fallbacks and clean it
-const API_URL = (import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://carecorner-bl2n.vercel.app/api' : 'http://localhost:5001/api'))
-  .trim()
-  .replace(/\/+$/, ''); // Remove trailing slashes
+// Use a direct API URL that bypasses the frontend
+const API_URL = import.meta.env.PROD 
+  ? 'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app/api'
+  : 'http://localhost:5001/api';
 
 console.log('API URL:', API_URL);
 console.log('Environment:', import.meta.env.MODE);
