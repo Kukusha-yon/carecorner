@@ -71,13 +71,15 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:5173',
       'https://carecorner-bl2n.vercel.app',
-      'https://carecorner-bl2n-5ig0zu2eu-yonatans-projects-2f1159da.vercel.app'
+      'https://carecorner-bl2n-5ig0zu2eu-yonatans-projects-2f1159da.vercel.app',
+      'https://carecorner-bl2n-5ig0zu2eu.vercel.app'
     ];
     
     // Check if the origin is in the allowed list
     if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('carecorner-bl2n-')) {
       callback(null, true);
     } else {
+      console.log('Rejected origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },

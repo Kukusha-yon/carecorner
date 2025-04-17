@@ -5,6 +5,8 @@ const API_URL = import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
 
 console.log('API URL:', API_URL);
+console.log('Environment:', import.meta.env.MODE);
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 
 // Define public routes that don't require authentication
 const publicRoutes = [

@@ -9,7 +9,10 @@ const router = express.Router();
 router.get('/', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0',
+    message: 'API is healthy and responding correctly'
   });
 });
 

@@ -14,6 +14,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import checkEnvironmentVariables from './utils/envCheck';
 import checkApiHealth from './services/healthService';
 import testApiConnection from './utils/testApiConnection';
+import testApi from './utils/apiTest';
 
 
 
@@ -173,12 +174,24 @@ const App = () => {
   const [apiError, setApiError] = useState(null);
   const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
     (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
+  const [apiTestResult, setApiTestResult] = useState(null);
   
   // Check environment variables and API health on app initialization
   useEffect(() => {
     const initializeApp = async () => {
       // Check environment variables
       checkEnvironmentVariables();
+      
+      // Test API
+      const result = await testApi();
+      setApiTestResult(result);
+      
+      if (!result.success) {
+        console.error('API test failed:', result.error);
+        setApiHealthy(false);
+        setApiError(`API test failed: ${result.error.message}`);
+        return;
+      }
       
       // Test API connection
       const apiTestResult = await testApiConnection(apiUrl);
@@ -222,6 +235,14 @@ const App = () => {
                     <p>We're having trouble connecting to our servers. Some features may not work correctly.</p>
                     {apiError && <p className="text-sm mt-1">{apiError}</p>}
                     <p className="text-sm mt-1">API URL: {apiUrl}</p>
+                    {apiTestResult && (
+                      <div className="mt-2 text-xs">
+                        <p>API Test Result:</p>
+                        <pre className="bg-gray-100 p-2 rounded mt-1 overflow-auto">
+                          {JSON.stringify(apiTestResult, null, 2)}
+                        </pre>
+                      </div>
+                    )}
                   </div>
                 )}
                 <AnimatedRoutes />
