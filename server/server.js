@@ -35,6 +35,9 @@ const __dirname = dirname(__filename);
 // Connect to MongoDB
 connectDB();
 
+app.get('/', (req,res) => {
+  res.json('Welcom to Care Corner API');
+})
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
