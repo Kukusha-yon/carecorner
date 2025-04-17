@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { getNewArrivals } from '../services/newArrivalService';
@@ -75,10 +75,10 @@ const NewArrivalSection = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">New Arrivals</h2>
           <Link 
-            to="/products" 
+            to="/new-arrivals" 
             className="text-primary hover:text-primary-dark transition-colors text-xs sm:text-sm md:text-base"
           >
-            View All Products
+            View All New Arrivals
           </Link>
         </div>
       </div>
@@ -136,7 +136,7 @@ const NewArrivalSection = () => {
           {newArrivals.map((newArrival) => (
             <SwiperSlide key={newArrival._id}>
               <Link
-                to={`/products/${newArrival._id}`}
+                to={`/new-arrivals/${newArrival._id}`}
                 className="block h-full"
               >
                 <motion.div

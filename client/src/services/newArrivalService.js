@@ -1,6 +1,6 @@
 import { api } from './api';
 
-const API_URL = '/new-arrivals';
+const API_URL = '/api/new-arrivals';
 
 // Get all new arrivals
 export const getNewArrivals = async () => {
@@ -8,26 +8,19 @@ export const getNewArrivals = async () => {
     const response = await api.get(API_URL);
     return response.data;
   } catch (error) {
-    console.error('Error fetching new arrivals:', error.response?.data || error.message);
-    throw error.response?.data || error.message;
+    console.error('Error fetching new arrivals:', error);
+    throw error;
   }
 };
 
 // Get a single new arrival by ID
-export const getNewArrivalById = async (id) => {
+export const getNewArrival = async (id) => {
   try {
-    console.log('Fetching new arrival with ID:', id);
     const response = await api.get(`${API_URL}/${id}`);
-    console.log('New arrival response:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching new arrival:', {
-      id,
-      error: error.response?.data || error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText
-    });
-    throw error.response?.data || error.message;
+    console.error('Error fetching new arrival:', error);
+    throw error;
   }
 };
 
@@ -58,8 +51,8 @@ export const createNewArrival = async (formData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error creating new arrival:', error.response?.data || error.message);
-    throw error.response?.data || error.message;
+    console.error('Error creating new arrival:', error);
+    throw error;
   }
 };
 
@@ -73,8 +66,8 @@ export const updateNewArrival = async (id, formData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error updating new arrival:', error.response?.data || error.message);
-    throw error.response?.data || error.message;
+    console.error('Error updating new arrival:', error);
+    throw error;
   }
 };
 
@@ -84,7 +77,7 @@ export const deleteNewArrival = async (id) => {
     const response = await api.delete(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting new arrival:', error.response?.data || error.message);
-    throw error.response?.data || error.message;
+    console.error('Error deleting new arrival:', error);
+    throw error;
   }
 }; 
