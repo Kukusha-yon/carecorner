@@ -58,22 +58,21 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 })); // Adds various HTTP headers for security
-app.use(cors({
+
+// CORS configuration
+const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
-    'http://localhost:5001',
     'https://carecorner-bl2n.vercel.app',
-    'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app',
-    'https://carecorner-bl2n-ch67jcegb-yonatans-projects-2f1159da.vercel.app',
     'https://carecorner-phi.vercel.app'
   ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400 // 24 hours
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 
 // Global rate limiter
 const globalLimiter = rateLimit({
