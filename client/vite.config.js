@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,16 +30,20 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://carecorner-phi.vercel.app',
         changeOrigin: true,
-        secure: false,
+        secure: true,
+        rewrite: (path) => path,
       },
     },
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
+    extensions: ['.js', '.jsx', '.json'],
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   }
 })

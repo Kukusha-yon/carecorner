@@ -164,14 +164,10 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-  const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
-  
-  // Log API URL for debugging
+  // Remove hardcoded API URL
   useEffect(() => {
-    console.log('API URL:', apiUrl);
     console.log('Environment:', import.meta.env.MODE);
-  }, [apiUrl]);
+  }, []);
 
   return (
     <ErrorBoundary>

@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Determine the API URL based on environment
-const API_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
+// Use relative URLs for API requests
+// This will work with the Vite proxy in development and with the Vercel rewrites in production
+const API_URL = '/api';
 
 console.log('API URL:', API_URL);
 console.log('Environment:', import.meta.env.MODE);
@@ -21,8 +21,6 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Don't try to set Origin header manually - browser will set this automatically
-    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

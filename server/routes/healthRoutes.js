@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import os from 'os';
 
 const router = express.Router();
 
@@ -22,10 +23,29 @@ router.get('/', async (req, res) => {
       database: {
         status: dbStatus,
         host: mongoose.connection.host || 'unknown',
-        name: mongoose.connection.name || 'unknown'
+        name: mongoose.connection.name || 'unknown',
+        readyState: mongoose.connection.readyState
       },
-      memory: process.memoryUsage(),
-      uptime: process.uptime()
+      system: {
+        platform: os.platform(),
+        arch: os.arch(),
+        nodeVersion: process.version,
+        memory: {
+          total: os.totalmem(),
+          free: os.freemem(),
+          used: process.memoryUsage()
+        },
+        uptime: process.uptime()
+      },
+      request: {
+        ip: req.ip,
+        method: req.method,
+        url: req.originalUrl,
+        headers: {
+          host: req.headers.host,
+          'user-agent': req.headers['user-agent']
+        }
+      }
     };
     
     res.status(200).json(serverInfo);

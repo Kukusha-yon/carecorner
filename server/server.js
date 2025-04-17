@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -36,9 +33,9 @@ const __dirname = dirname(__filename);
 // Connect to MongoDB
 connectDB();
 
-app.get('/', (req,res) => {
-  res.json('Welcom to Care Corner API');
-})
+// Enable trust proxy for Vercel
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -46,67 +43,41 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5001", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-bl2n.vercel.app", "https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app", "https://carecorner-bl2n-ch67jcegb-yonatans-projects-2f1159da.vercel.app", "https://carecorner-phi.vercel.app"],
-      fontSrc: ["'self'", "https:", "data:"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'self'"],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
-})); // Adds various HTTP headers for security
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://carecorner-phi.vercel.app", "https://carecorner-bl2n.vercel.app"]
+    }
+  }
+}));
 
 // CORS configuration
-const corsOptions = {
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://carecorner-bl2n.vercel.app',
-      'https://carecorner-phi.vercel.app'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      console.log('Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+app.use(cors({
+  origin: [
+    'https://carecorner-bl2n.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400 // 24 hours
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 
-// Apply CORS middleware
-app.use(cors(corsOptions));
-
-// Add OPTIONS handling for preflight requests
-app.options('*', cors(corsOptions));
+// Body parser
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Global rate limiter
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // limit each IP to 1000 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
 });
 app.use(globalLimiter);
 
-// Body parser
-app.use(express.json({ limit: '10kb' })); // Limit body size to 10kb
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-
 // Data sanitization
-app.use(xss()); // Sanitize data
-app.use(hpp()); // Prevent HTTP Parameter Pollution
+app.use(xss());
+app.use(hpp());
 
 // Compression
 app.use(compression());
@@ -119,18 +90,24 @@ app.use('/api/partners', partnerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/featured-products', featuredProductRoutes);
 app.use('/api/settings', settingRoutes);
-app.use('/api/external', apiRoutes);
+app.use('/api', apiRoutes);
 app.use('/api/new-arrivals', newArrivalRoutes);
 app.use('/api/health', healthRoutes);
 
 // Error handling
 app.use(errorHandler);
 
+// Handle 404
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl
+  });
+});
+
 // Initialize settings
 initializeSettings();
 
-// Start server
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-}); 
+// Export the Express API
+export default app; 

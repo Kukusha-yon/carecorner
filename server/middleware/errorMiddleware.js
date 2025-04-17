@@ -9,7 +9,12 @@ export const errorHandler = (err, req, res, next) => {
     name: err.name,
     code: err.code,
     path: err.path,
-    value: err.value
+    value: err.value,
+    url: req.originalUrl,
+    method: req.method,
+    body: req.body,
+    query: req.query,
+    params: req.params
   });
 
   // Handle AppError
@@ -21,58 +26,8 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Map error types to status codes and messages
-  const errorTypes = {
-    ValidationError: {
-      status: 400,
-      message: 'Validation Error',
-      getErrors: (err) => Object.values(err.errors).map(error => error.message)
-    },
-    CastError: {
-      status: 400,
-      message: 'Invalid ID format',
-      getDetails: (err) => `Invalid ${err.path}: ${err.value}`
-    },
-    JsonWebTokenError: {
-      status: 401,
-      message: 'Invalid token. Please log in again.'
-    },
-    TokenExpiredError: {
-      status: 401,
-      message: 'Token expired. Please log in again.'
-    },
-    UnauthorizedError: {
-      status: 401,
-      message: 'Unauthorized access'
-    },
-    ForbiddenError: {
-      status: 403,
-      message: 'Forbidden access'
-    },
-    NotFoundError: {
-      status: 404,
-      message: 'Resource not found'
-    },
-    ConflictError: {
-      status: 409,
-      message: 'Resource conflict'
-    }
-  };
-
-  // Handle known error types
-  const errorType = errorTypes[err.name];
-  if (errorType) {
-    return res.status(errorType.status).json({
-      success: false,
-      message: errorType.message,
-      ...(errorType.getErrors && { errors: errorType.getErrors(err) }),
-      ...(errorType.getDetails && { details: errorType.getDetails(err) }),
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    });
-  }
-
-  // Handle duplicate key errors
-  if (err.code === 11000) {
+  // Handle MongoDB connection errors
+  if (err.name === 'MongoServerError' && err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
     return res.status(400).json({
       success: false,
@@ -81,10 +36,50 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Handle MongoDB connection errors
+  if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection error. Please try again later.',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  }
+
+  // Handle validation errors
+  if (err.name === 'ValidationError') {
+    const errors = Object.values(err.errors).map(error => error.message);
+    return res.status(400).json({
+      success: false,
+      message: 'Validation Error',
+      errors,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  }
+
+  // Handle JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token. Please log in again.',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      success: false,
+      message: 'Token expired. Please log in again.',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    });
+  }
+
   // Default error
   res.status(500).json({
     success: false,
     message: 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: err.stack,
+      error: err.message
+    })
   });
 }; 
