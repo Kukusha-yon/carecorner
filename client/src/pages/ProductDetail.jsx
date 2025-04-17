@@ -9,7 +9,7 @@ import { useCart } from '../context/CartContext';
 import { api } from '../services/api';
 import { getProductById } from '../services/productService';
 import { getFeaturedProductByProductId } from '../services/featuredProductService';
-import { getNewArrivalById } from '../services/newArrivalService';
+import { getNewArrival } from '../services/newArrivalService';
 import { Loader2 } from 'lucide-react';
 
 const ProductDetail = () => {
@@ -66,7 +66,7 @@ const ProductDetail = () => {
   // Fetch new arrival if we're on a new arrival path or if product fetch failed
   const { data: newArrival, isLoading: isLoadingNewArrival, error: newArrivalError } = useQuery({
     queryKey: ['newArrival', id],
-    queryFn: () => getNewArrivalById(id),
+    queryFn: () => getNewArrival(id),
     enabled: isNewArrival,
     retry: false,
     onError: (error) => {
