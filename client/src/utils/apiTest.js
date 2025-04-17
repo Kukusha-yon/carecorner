@@ -11,33 +11,43 @@ export const testApi = async () => {
   console.log('Testing API at:', apiUrl);
   
   try {
-    // Test the root endpoint
-    const rootResponse = await axios.get('https://carecorner-phi.vercel.app/', {
-      timeout: 5000
-    });
-    console.log('Root endpoint response:', rootResponse.data);
-    
-    // Test the health endpoint
+    // Test the health endpoint with proper headers
     const healthResponse = await axios.get(`${apiUrl}/health`, {
-      timeout: 5000
+      timeout: 5000,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
     });
+    
     console.log('Health endpoint response:', healthResponse.data);
     
     return {
       success: true,
-      rootResponse: rootResponse.data,
-      healthResponse: healthResponse.data
+      healthResponse: healthResponse.data,
+      apiUrl
     };
   } catch (error) {
     console.error('API test failed:', error);
+    
+    // Provide more detailed error information
+    const errorDetails = {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
+    };
+    
     return {
       success: false,
-      error: {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data
-      }
+      error: errorDetails,
+      apiUrl
     };
   }
 };
