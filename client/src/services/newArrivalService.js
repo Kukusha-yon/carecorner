@@ -5,7 +5,10 @@ const API_URL = '/api/new-arrivals';
 // Get all new arrivals
 export const getNewArrivals = async () => {
   try {
+    console.log('Fetching new arrivals...');
     const response = await api.get(API_URL);
+    console.log('New arrivals response:', response.data);
+    
     // Ensure we always return an array
     return Array.isArray(response.data) ? response.data : [];
   } catch (error) {

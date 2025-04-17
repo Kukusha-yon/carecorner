@@ -18,6 +18,11 @@ const publicRoutes = [
   '/new-arrivals'
 ];
 
+// Helper function to check if a route is public
+const isPublicRoute = (url) => {
+  return publicRoutes.some(route => url.includes(route));
+};
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -40,11 +45,12 @@ api.interceptors.request.use(
     const token = localStorage.getItem('token');
     console.log('Authentication token:', token ? `Present (${token.slice(0, 10)}...)` : 'Missing');
     
-    if (token) {
+    // Only add token for non-public routes
+    if (token && !isPublicRoute(config.url)) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log('Added Authorization header');
-    } else {
-      console.error('No token available for request to:', config.url);
+    } else if (!isPublicRoute(config.url)) {
+      console.log('No token available for protected route:', config.url);
     }
     return config;
   },

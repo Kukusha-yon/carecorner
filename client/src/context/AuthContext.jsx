@@ -44,18 +44,30 @@ export const AuthProvider = ({ children }) => {
       }
       
       console.log('Token found, verifying with server...');
-      const user = await getCurrentUserService();
-      
-      if (user && user._id) {
-        console.log('User authenticated successfully:', user.email, 'Role:', user.role);
-        setUser(user);
-      } else {
-        console.log('Server returned invalid user data');
+      try {
+        const user = await getCurrentUserService();
+        
+        if (user && user._id) {
+          console.log('User authenticated successfully:', user.email, 'Role:', user.role);
+          setUser(user);
+        } else {
+          console.log('Server returned invalid user data');
+          setUser(null);
+          // Clear invalid tokens
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+        }
+      } catch (authError) {
+        console.error('Auth verification failed:', authError);
         setUser(null);
+        // Clear invalid tokens
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      setError(error.message || 'Authentication check failed');
     } finally {
       setLoading(false);
     }
