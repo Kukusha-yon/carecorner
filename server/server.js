@@ -89,6 +89,27 @@ app.use(hpp());
 // Compression
 app.use(compression());
 
+// Root route handler
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to CareCorner API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      products: '/api/products',
+      orders: '/api/orders',
+      partners: '/api/partners',
+      admin: '/api/admin',
+      featuredProducts: '/api/featured-products',
+      settings: '/api/settings',
+      newArrivals: '/api/new-arrivals',
+      health: '/api/health'
+    },
+    documentation: 'API documentation coming soon'
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
