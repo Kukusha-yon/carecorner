@@ -38,7 +38,7 @@ connectDB();
 
 app.get('/', (req,res) => {
   res.json({
-    message: "Welcome to my website"
+    message: "Welcome to my website !"
   })
 })
 // Security middleware
