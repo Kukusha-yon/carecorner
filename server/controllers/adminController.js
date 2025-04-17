@@ -85,51 +85,78 @@ export const getStats = async (req, res) => {
 export const getDashboard = async (req, res) => {
   try {
     // Get total revenue
-    const totalRevenueResult = await Order.aggregate([
-      { $match: { status: { $ne: 'cancelled' } } },
-      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+    const totalRevenue = await Order.aggregate([
+      { $match: { status: { $in: ['completed', 'processing'] } } },
+      { $group: { _id: null, total: { $sum: '$total' } } }
     ]);
-    
-    const totalRevenue = totalRevenueResult.length > 0 ? totalRevenueResult[0].total : 0;
-    
+
     // Get total orders
-    const totalOrders = await Order.countDocuments({ status: { $ne: 'cancelled' } });
-    
-    // Calculate average order value
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-    
+    const totalOrders = await Order.countDocuments();
+
+    // Get average order value
+    const averageOrderValue = totalOrders > 0 
+      ? (totalRevenue[0]?.total || 0) / totalOrders 
+      : 0;
+
     // Get total customers
     const totalCustomers = await User.countDocuments({ role: 'user' });
-    
-    // Get recent orders
-    const recentOrders = await Order.find({ status: { $ne: 'cancelled' } })
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .populate('user', 'name email')
-      .select('_id user status totalAmount createdAt');
 
-    // Format recent orders for the frontend
-    const formattedRecentOrders = recentOrders.map(order => ({
-      id: order._id,
-      customer: order.user ? order.user.name : 'Unknown Customer',
-      amount: order.totalAmount,
-      status: order.status,
-      date: new Date(order.createdAt).toLocaleDateString()
-    }));
+    // Get recent orders with pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('user', 'name email')
+      .lean();
 
     // Get order status distribution
     const orderStatusDistribution = await Order.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-      { $project: { status: '$_id', count: 1, _id: 0 } }
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    // Get sales by category
+    const salesByCategory = await Order.aggregate([
+      { $match: { status: { $in: ['completed', 'processing'] } } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'product' } },
+      { $unwind: '$product' },
+      { $group: { _id: '$product.category', total: { $sum: { $multiply: ['$items.price', '$items.quantity'] } } } },
+      { $project: { category: '$_id', total: 1, _id: 0 } },
+      { $sort: { total: -1 } }
+    ]);
+
+    // Get top products
+    const topProducts = await Order.aggregate([
+      { $match: { status: { $in: ['completed', 'processing'] } } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'product' } },
+      { $unwind: '$product' },
+      { $group: { 
+          _id: '$product._id', 
+          name: { $first: '$product.name' },
+          category: { $first: '$product.category' },
+          sales: { $sum: '$items.quantity' },
+          stock: { $first: '$product.stock' }
+        }
+      },
+      { $sort: { sales: -1 } },
+      { $limit: 10 },
+      { $project: { _id: 0 } }
     ]);
 
     res.json({
-      totalRevenue,
+      totalRevenue: totalRevenue[0]?.total || 0,
       totalOrders,
       averageOrderValue,
       totalCustomers,
-      recentOrders: formattedRecentOrders,
-      orderStatusDistribution
+      recentOrders,
+      orderStatusDistribution,
+      salesByCategory,
+      topProducts
     });
   } catch (error) {
     console.error('Error fetching dashboard data:', error);

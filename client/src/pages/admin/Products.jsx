@@ -22,7 +22,7 @@ import {
 const Products = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user, loading, checkAuth } = useAuth();
+  const { user, loading } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [sortField, setSortField] = useState('name');
@@ -30,72 +30,32 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [itemsPerPage] = useState(10);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   // Check if the user is logged in and has the correct role
   useEffect(() => {
-    const verifyAuth = async () => {
-      if (isCheckingAuth) return;
-      
-      try {
-        setIsCheckingAuth(true);
-        if (!loading && (!user || user.role !== 'admin')) {
-          console.log('Verifying authentication...');
-          const authUser = await checkAuth();
-          if (!authUser || authUser.role !== 'admin') {
-            console.log('User not authenticated or not an admin, redirecting to login');
-            navigate('/login');
-          }
-        }
-      } catch (error) {
-        console.error('Auth verification error:', error);
+    if (!loading) {
+      if (!user) {
+        console.log('User not authenticated, redirecting to login');
         navigate('/login');
-      } finally {
-        setIsCheckingAuth(false);
+      } else if (user.role !== 'admin') {
+        console.log('User is not an admin, redirecting to home');
+        navigate('/');
       }
-    };
-
-    verifyAuth();
-  }, [user, loading, navigate, checkAuth, isCheckingAuth]);
+    }
+  }, [user, loading, navigate]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products', 'admin'],
     queryFn: async () => {
       console.log('Fetching products with admin parameter');
-      try {
-        const result = await getProducts({ admin: true });
-        console.log('Products data received:', result);
-        return result;
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        if (error.message === 'Session expired. Please log in again.') {
-          navigate('/login');
-        }
-        throw error;
-      }
+      const result = await getProducts({ admin: true });
+      console.log('Products data received:', result);
+      return result;
     },
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
-    retry: 1,
-    enabled: !!user && user.role === 'admin' && !isCheckingAuth,
-    onError: (error) => {
-      console.error('Products query error:', error);
-      if (error.message === 'Session expired. Please log in again.') {
-        toast.error('Your session has expired. Please log in again.');
-        navigate('/login');
-      } else {
-        toast.error('Error loading products. Please try again.');
-      }
-    }
+    enabled: !!user && user.role === 'admin'
   });
-
-  // Handle authentication errors
-  useEffect(() => {
-    if (error && error.response?.status === 401) {
-      console.error('Authentication error in Products component:', error);
-      // Let the auth check useEffect handle the redirect
-    }
-  }, [error]);
 
   console.log('Products data in component:', productsData);
   const products = productsData?.products || [];

@@ -8,10 +8,15 @@ import rateLimit from 'express-rate-limit';
 // Create rate limiter using in-memory storage
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts
+  max: 20, // Increased from 5 to 20 attempts
   message: 'Too many login attempts. Please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  skipSuccessfulRequests: true, // Don't count successful requests
+  keyGenerator: (req) => {
+    // Use IP + email as the key to prevent brute force on specific accounts
+    return `${req.ip}-${req.body.email}`;
+  }
 });
 
 // Token generation functions

@@ -1,17 +1,13 @@
 import axios from 'axios';
 
-// Use a hardcoded value for the backend URL
-const API_URL = 'https://carecorner-phi.vercel.app/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 // Define public routes that don't require authentication
 const publicRoutes = [
   '/external/stock-data',
   '/external/news',
   '/products/featured',
-  '/products/categories',
-  '/partners',
-  '/featured-products',
-  '/new-arrivals'
+  '/products/categories'
 ];
 
 const api = axios.create({
@@ -38,11 +34,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
       console.log('Added Authorization header');
     } else {
-      // Don't log error for public routes
-      const isPublicRoute = publicRoutes.some(route => config.url.includes(route));
-      if (!isPublicRoute) {
-        console.warn('No token available for request to:', config.url);
-      }
+      console.error('No token available for request to:', config.url);
     }
     return config;
   },
@@ -65,7 +57,6 @@ api.interceptors.response.use(
     const newToken = response.headers['x-new-token'];
     if (newToken) {
       localStorage.setItem('token', newToken);
-      console.log('New token received and stored');
     }
     return response;
   },
@@ -73,8 +64,7 @@ api.interceptors.response.use(
     console.error('API response error:', {
       url: error.config?.url,
       status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
+      data: error.response?.data
     });
     
     const originalRequest = error.config;
@@ -92,10 +82,6 @@ api.interceptors.response.use(
         // Try to refresh the token
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          console.error('No refresh token available');
-          // Clear all auth data but don't redirect - let the AuthContext handle it
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
           throw new Error('No refresh token available');
         }
         
@@ -103,40 +89,38 @@ api.interceptors.response.use(
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {
           refreshToken
         });
+        console.log('Token refresh response:', response.data);
         
-        if (response.data && response.data.accessToken) {
-          // Store the new tokens
-          localStorage.setItem('token', response.data.accessToken);
-          if (response.data.refreshToken) {
-            localStorage.setItem('refreshToken', response.data.refreshToken);
-          }
-          
-          // Update the Authorization header
-          originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
-          
-          // Retry the original request
-          return api(originalRequest);
-        } else {
-          throw new Error('Invalid refresh token response');
+        // Save both the new access token and refresh token
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        localStorage.setItem('token', accessToken);
+        
+        // Save the new refresh token if it exists
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
         }
+        
+        // Retry the original request with the new token
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        // Clear tokens but don't redirect - let the AuthContext handle it
+        // If refresh token fails, clear tokens and redirect to login
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        return Promise.reject(error);
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
     }
     
-    // Handle CORS errors
-    if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
-      console.error('CORS or network error detected');
-      return Promise.reject(new Error('Unable to connect to the server. Please check your internet connection.'));
+    // Only redirect to login for non-public routes
+    if (error.response?.status === 401 && !isPublicRoute) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
     }
     
     return Promise.reject(error);
   }
 );
 
-// Export the api instance
 export { api }; 

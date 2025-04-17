@@ -1,5 +1,7 @@
 import express from 'express';
 import { protect, admin } from '../middleware/authMiddleware.js';
+import { adminLimiter } from '../middleware/rateLimiter.js';
+import { auditLogger } from '../middleware/auditLogger.js';
 import {
   getStats,
   getUsers,
@@ -17,42 +19,30 @@ import { upload } from '../utils/cloudinary.js';
 
 const router = express.Router();
 
-// Protect all routes
+// Apply rate limiting and audit logging to all admin routes
 router.use(protect);
 router.use(admin);
+router.use(adminLimiter);
+router.use(auditLogger);
 
-// Error handling middleware
-router.use((err, req, res, next) => {
-  console.error('Admin route error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal server error',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-  });
-});
-
-// Dashboard statistics
+// Dashboard routes
 router.get('/stats', getStats);
 router.get('/dashboard', getDashboard);
+router.get('/analytics', getAnalytics);
 
-// Specific stats endpoints
+// User management routes
+router.get('/users', getUsers);
+router.post('/users', createUser);
+router.patch('/users/:id/role', updateUserRole);
+router.delete('/users/:id', deleteUser);
+
+// Statistics routes
 router.get('/orders/stats', getOrderStats);
 router.get('/products/stats', getProductStats);
 router.get('/customers/stats', getCustomerStats);
 
-// Analytics data
-router.get('/analytics', getAnalytics);
-
-// User management
-router.get('/users', getUsers);
-router.post('/users', createUser);
-router.put('/users/:userId/role', updateUserRole);
-router.delete('/users/:userId', deleteUser);
-
-// Settings management
+// Settings routes
 router.get('/settings', getSettings);
-router.put('/settings', upload.fields([
-  { name: 'logo', maxCount: 1 },
-  { name: 'favicon', maxCount: 1 }
-]), updateSettings);
+router.patch('/settings', updateSettings);
 
 export default router; 
