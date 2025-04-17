@@ -36,25 +36,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (!validateForm()) {
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const userData = await login({ email, password });
-      console.log('Login successful:', userData);
-      
-      // Redirect based on role
-      if (userData.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/profile-settings');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError(error.message || 'An error occurred during login');
+      await login(email, password);
+      // Navigation is handled in the AuthContext after successful login
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to login. Please try again.');
     } finally {
       setLoading(false);
     }
