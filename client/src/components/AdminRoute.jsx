@@ -1,9 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 const AdminRoute = ({ children }) => {
-  const { user, loading, checkAuth } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(false);
 
@@ -14,7 +15,11 @@ const AdminRoute = ({ children }) => {
       if (user && !isChecking) {
         setIsChecking(true);
         try {
-          await checkAuth();
+          // Verify the user is still authenticated
+          const authenticated = isAuthenticated();
+          if (!authenticated) {
+            console.log('User is no longer authenticated');
+          }
         } catch (error) {
           console.error('Auth check failed:', error);
         } finally {
@@ -24,22 +29,26 @@ const AdminRoute = ({ children }) => {
     };
 
     verifyAuth();
-  }, [location.pathname, checkAuth, user, isChecking]);
+  }, [location.pathname, isAuthenticated, user, isChecking]);
 
   if (loading || isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#39b54a]"></div>
+        <LoadingSpinner />
       </div>
     );
   }
 
-  if (!user && !['/login', '/register', '/'].includes(location.pathname)) {
+  // If not authenticated, redirect to login
+  if (!user) {
+    console.log('No user found, redirecting to login');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user && user.role !== 'admin') {
-    return <Navigate to="/profile-settings" replace />;
+  // If not admin, redirect to home
+  if (user.role !== 'admin') {
+    console.log('User is not an admin, redirecting to home');
+    return <Navigate to="/" replace />;
   }
 
   return children;

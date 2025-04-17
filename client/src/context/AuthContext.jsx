@@ -45,7 +45,13 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await authLogin(credentials);
       setUser(response.user);
-      navigate('/dashboard');
+      
+      // Navigate based on user role
+      if (response.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
       setError(error.message || 'Login failed');

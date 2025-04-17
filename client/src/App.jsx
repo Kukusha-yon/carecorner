@@ -169,7 +169,7 @@ const App = () => {
   const [apiHealthy, setApiHealthy] = useState(true);
   const [apiError, setApiError] = useState(null);
   const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app/api' : 'http://localhost:5001/api'));
+    (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
   
   // Check environment variables and API health on app initialization
   useEffect(() => {
@@ -178,16 +178,16 @@ const App = () => {
       checkEnvironmentVariables();
       
       // Test API connection
-      const apiTestResult = await testApiConnection(apiUrl);
+      const apiTestResult = await testApiConnection();
       if (!apiTestResult.success) {
         console.error('API connection test failed:', apiTestResult.error);
         setApiHealthy(false);
-        setApiError(`API connection error: ${apiTestResult.error.message}`);
+        setApiError(`API connection error: ${apiTestResult.error}`);
       }
     };
     
     initializeApp();
-  }, [apiUrl]);
+  }, []);
 
   return (
     <ErrorBoundary>
