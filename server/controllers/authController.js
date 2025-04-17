@@ -103,10 +103,6 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    // Set CORS headers explicitly
-    res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://carecorner-bl2n.vercel.app');
-    res.header('Access-Control-Allow-Credentials', 'true');
-
     // Return user data and token
     return res.status(200).json({
       success: true,

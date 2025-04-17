@@ -21,8 +21,7 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add origin header for CORS
-    config.headers['Origin'] = window.location.origin;
+    // Don't try to set Origin header manually - browser will set this automatically
     
     const token = localStorage.getItem('token');
     if (token) {
@@ -66,10 +65,7 @@ api.interceptors.response.use(
       try {
         // Try to refresh token
         const response = await axios.post(`${API_URL}/auth/refresh-token`, {}, {
-          withCredentials: true,
-          headers: {
-            'Origin': window.location.origin
-          }
+          withCredentials: true
         });
         
         if (response.data && response.data.token) {
