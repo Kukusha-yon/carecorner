@@ -11,8 +11,8 @@ export const testApi = async () => {
   console.log('Testing API at:', apiUrl);
   
   try {
-    // Test the health endpoint with proper headers
-    const healthResponse = await axios.get(`${apiUrl}/health`, {
+    // Test the products endpoint with proper headers
+    const productsResponse = await axios.get(`${apiUrl}/products`, {
       timeout: 5000,
       headers: {
         'Accept': 'application/json',
@@ -21,11 +21,11 @@ export const testApi = async () => {
       withCredentials: false // Set to false to avoid CORS issues
     });
     
-    console.log('Health endpoint response:', healthResponse.data);
+    console.log('Products endpoint response:', productsResponse.data);
     
     return {
       success: true,
-      healthResponse: healthResponse.data,
+      productsResponse: productsResponse.data,
       apiUrl
     };
   } catch (error) {

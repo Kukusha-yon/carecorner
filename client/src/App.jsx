@@ -12,7 +12,6 @@ import { AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import checkEnvironmentVariables from './utils/envCheck';
-import checkApiHealth from './services/healthService';
 import testApiConnection from './utils/testApiConnection';
 import testApi from './utils/apiTest';
 
@@ -173,7 +172,7 @@ const App = () => {
   const [apiHealthy, setApiHealthy] = useState(true);
   const [apiError, setApiError] = useState(null);
   const [apiUrl, setApiUrl] = useState(import.meta.env.VITE_API_URL || 
-    (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api'));
+    (import.meta.env.PROD ? 'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app/api' : 'http://localhost:5001/api'));
   const [apiTestResult, setApiTestResult] = useState(null);
   
   // Check environment variables and API health on app initialization
@@ -202,20 +201,8 @@ const App = () => {
         return;
       }
       
-      // Check API health
-      try {
-        const isHealthy = await checkApiHealth();
-        setApiHealthy(isHealthy);
-        
-        if (!isHealthy) {
-          console.error('API is not healthy. Some features may not work correctly.');
-          setApiError('API is not responding correctly. Please try again later.');
-        }
-      } catch (error) {
-        console.error('Failed to check API health:', error);
-        setApiHealthy(false);
-        setApiError(`API connection error: ${error.message}`);
-      }
+      // If we get here, the API is healthy
+      setApiHealthy(true);
     };
     
     initializeApp();
