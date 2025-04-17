@@ -125,8 +125,16 @@ const Footer = () => {
               <div className="col-span-4 text-center text-red-500">
                 Error loading partners
               </div>
+            ) : !partners || !Array.isArray(partners) ? (
+              <div className="col-span-4 text-center text-gray-500">
+                No partners available
+              </div>
+            ) : partners.length === 0 ? (
+              <div className="col-span-4 text-center text-gray-500">
+                No partners available
+              </div>
             ) : (
-              partners?.map((partner) => (
+              partners.map((partner) => (
                 <a
                   key={partner._id}
                   href={partner.link}

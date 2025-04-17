@@ -5,10 +5,12 @@ const API_URL = '/featured-products';
 export const getFeaturedProducts = async (includeInactive = false) => {
   try {
     const response = await api.get(`${API_URL}${includeInactive ? '?includeInactive=true' : ''}`);
-    return response.data;
+    // Ensure we always return an array
+    return Array.isArray(response.data) ? response.data : [];
   } catch (error) {
     console.error('Error fetching featured products:', error);
-    throw error;
+    // Return empty array on error to prevent UI errors
+    return [];
   }
 };
 

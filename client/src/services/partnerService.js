@@ -5,10 +5,12 @@ const API_URL = '/partners';
 export const getPartners = async () => {
   try {
     const response = await api.get(API_URL);
-    return response.data;
+    // Ensure we always return an array
+    return Array.isArray(response.data) ? response.data : [];
   } catch (error) {
     console.error('Error fetching partners:', error);
-    throw error;
+    // Return empty array on error to prevent UI errors
+    return [];
   }
 };
 

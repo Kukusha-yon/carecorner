@@ -245,64 +245,67 @@ const Home = () => {
           ) : featuredProducts && featuredProducts.length > 0 ? (
             <div className="relative">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-                {featuredProducts
-                  .filter(product => category === 'all' || product.category === category)
-                  .sort((a, b) => {
-                    if (sortBy === 'price-low') return a.price - b.price;
-                    if (sortBy === 'price-high') return b.price - a.price;
-                    if (sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
-                    return a.featuredOrder - b.featuredOrder; // Default to featured order
-                  })
-                  .slice(0, maxProductsToShow)
-                  .map((product) => (
-                    <motion.div 
-                      key={product._id} 
-                      className="group"
-                      whileHover={{ y: -5 }}
-                      transition={{ duration: 0.2 }}
-                      initial={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      animate={selectedProduct === product._id ? { opacity: 0.7, scale: 0.95 } : { opacity: 1, scale: 1 }}
-                    >
-                      <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-500 hover:shadow-2xl hover:border-[#39b54a] h-full flex flex-col">
-                        {/* Image Container */}
-                        <div 
-                          onClick={() => handleProductClick(product)}
-                          className="block cursor-pointer"
-                        >
-                          <div className="relative h-48 overflow-hidden">
-                            <img
-                              src={product.featuredImage || product.image}
-                              alt={product.featuredTitle || product.name}
-                              className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-110"
-                            />
-                          </div>
-
-                          {/* Product Info */}
-                          <div className="p-3 sm:p-4 md:p-6 flex-grow flex flex-col justify-between">
-                            <div>
-                              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-[#39b54a] transition-colors duration-300 line-clamp-2 h-12 sm:h-14 md:h-16">
-                                {product.featuredTitle || product.name}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-2 h-10">
-                                {product.featuredDescription || product.description}
-                              </p>
+                {Array.isArray(featuredProducts) ? 
+                  featuredProducts
+                    .filter(product => category === 'all' || product.category === category)
+                    .sort((a, b) => {
+                      if (sortBy === 'price-low') return a.price - b.price;
+                      if (sortBy === 'price-high') return b.price - a.price;
+                      if (sortBy === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
+                      return a.featuredOrder - b.featuredOrder; // Default to featured order
+                    })
+                    .slice(0, maxProductsToShow)
+                    .map((product) => (
+                      <motion.div 
+                        key={product._id} 
+                        className="group"
+                        whileHover={{ y: -5 }}
+                        transition={{ duration: 0.2 }}
+                        initial={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        animate={selectedProduct === product._id ? { opacity: 0.7, scale: 0.95 } : { opacity: 1, scale: 1 }}
+                      >
+                        <div className="relative overflow-hidden rounded-2xl bg-white border border-gray-200 transition-all duration-500 hover:shadow-2xl hover:border-[#39b54a] h-full flex flex-col">
+                          {/* Image Container */}
+                          <div 
+                            onClick={() => handleProductClick(product)}
+                            className="block cursor-pointer"
+                          >
+                            <div className="relative h-48 overflow-hidden">
+                              <img
+                                src={product.featuredImage || product.image}
+                                alt={product.featuredTitle || product.name}
+                                className="w-full h-full object-cover object-center transform transition-transform duration-500 group-hover:scale-110"
+                              />
                             </div>
-                            <div className="flex justify-between items-center mt-auto">
-                              <span className="text-lg font-bold text-gray-900">
-                                ETB {product.price.toFixed(2)}
-                              </span>
-                              {product.featuredButtonText && (
-                                <span className="text-sm text-[#39b54a]">
-                                  {product.featuredButtonText}
+
+                            {/* Product Info */}
+                            <div className="p-3 sm:p-4 md:p-6 flex-grow flex flex-col justify-between">
+                              <div>
+                                <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-1 sm:mb-2 group-hover:text-[#39b54a] transition-colors duration-300 line-clamp-2 h-12 sm:h-14 md:h-16">
+                                  {product.featuredTitle || product.name}
+                                </h3>
+                                <p className="text-sm text-gray-600 mb-2 line-clamp-2 h-10">
+                                  {product.featuredDescription || product.description}
+                                </p>
+                              </div>
+                              <div className="flex justify-between items-center mt-auto">
+                                <span className="text-lg font-bold text-gray-900">
+                                  ETB {product.price.toFixed(2)}
                                 </span>
-                              )}
+                                {product.featuredButtonText && (
+                                  <span className="text-sm text-[#39b54a]">
+                                    {product.featuredButtonText}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))
+                  : <div className="col-span-full text-center py-8">No featured products available.</div>
+                }
               </div>
             </div>
           ) : (
