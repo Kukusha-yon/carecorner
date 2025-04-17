@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { ChevronRight, Star, Truck, Shield, Check, Info, ChevronDown, ChevronUp, ShoppingCart, Heart, ZoomIn, ArrowLeft, X } from 'lucide-react';
 import PageTransition from '../components/ui/PageTransition';
 import { useCart } from '../context/CartContext';
-import { api } from '../services/api';
+import api from '../services/api';
 import { getProductById } from '../services/productService';
 import { getFeaturedProductByProductId } from '../services/featuredProductService';
 import { getNewArrival } from '../services/newArrivalService';

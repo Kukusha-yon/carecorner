@@ -1,6 +1,7 @@
-import { api } from './api';
+import api from './api';
 
-const API_URL = '/api/new-arrivals';
+// Remove the '/api' prefix since it's already included in the baseURL
+const API_URL = '/new-arrivals';
 
 // Get all new arrivals
 export const getNewArrivals = async () => {

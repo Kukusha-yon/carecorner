@@ -8,15 +8,10 @@ import rateLimit from 'express-rate-limit';
 // Create rate limiter using in-memory storage
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Increased from 5 to 20 attempts
+  max: 5, // 5 attempts
   message: 'Too many login attempts. Please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  skipSuccessfulRequests: true, // Don't count successful requests
-  keyGenerator: (req) => {
-    // Use IP + email as the key to prevent brute force on specific accounts
-    return `${req.ip}-${req.body.email}`;
-  }
 });
 
 // Token generation functions
@@ -27,7 +22,7 @@ const generateAccessToken = (user) => {
       role: user.role 
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE }
+    { expiresIn: '24h' }
   );
 };
 
@@ -38,7 +33,7 @@ const generateRefreshToken = (user) => {
       role: user.role 
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRE }
+    { expiresIn: '7d' }
   );
 };
 
@@ -348,7 +343,7 @@ export const refreshToken = async (req, res) => {
       },
       process.env.JWT_SECRET,
       { 
-        expiresIn: process.env.JWT_EXPIRE,
+        expiresIn: '24h',  // Increased from 15m to 24h
         algorithm: 'HS256'
       }
     );
@@ -362,7 +357,7 @@ export const refreshToken = async (req, res) => {
       },
       process.env.JWT_REFRESH_SECRET,
       { 
-        expiresIn: process.env.JWT_REFRESH_EXPIRE,
+        expiresIn: '30d',  // 30 days
         algorithm: 'HS256'
       }
     );

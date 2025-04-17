@@ -1,4 +1,4 @@
-import { api } from './api';
+import api from './api';
 
 // Product categories
 export const PRODUCT_CATEGORIES = {

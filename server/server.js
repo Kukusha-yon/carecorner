@@ -24,7 +24,6 @@ import apiRoutes from './routes/apiRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import { initializeSettings } from './controllers/settingController.js';
 import newArrivalRoutes from './routes/newArrivalRoutes.js';
-import healthRoutes from './routes/healthRoutes.js';
 
 // Create Express app
 const app = express();
@@ -36,12 +35,6 @@ const __dirname = dirname(__filename);
 // Connect to MongoDB
 connectDB();
 
-
-app.get('/', (req,res) => {
-  res.json({
-    message: "Welcome to my website !"
-  })
-})
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -50,7 +43,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5000", "https://api.alphavantage.co", "https://newsdata.io", "https://carecorner-phi.vercel.app", "https://*.vercel.app", "https://carecorner-bl2n-5ig0zu2eu-yonatans-projects-2f1159da.vercel.app"],
+      connectSrc: ["'self'", "http://localhost:3000", "http://localhost:5173", "http://localhost:5000", "https://api.alphavantage.co", "https://newsdata.io"],
       fontSrc: ["'self'", "https:", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
@@ -59,32 +52,17 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 })); // Adds various HTTP headers for security
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://carecorner-bl2n.vercel.app',
-      'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app'
-    ];
-    
-    // Check if the origin is in the allowed list
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('carecorner-')) {
-      callback(null, true);
-    } else {
-      console.log('Rejected origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5001',
+    'https://carecorner-phi.vercel.app'
+  ],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Global rate limiter
@@ -116,7 +94,6 @@ app.use('/api/featured-products', featuredProductRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/external', apiRoutes);
 app.use('/api/new-arrivals', newArrivalRoutes);
-app.use('/api/health', healthRoutes);
 
 // Error handling
 app.use(errorHandler);

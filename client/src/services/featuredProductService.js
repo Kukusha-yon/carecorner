@@ -1,6 +1,6 @@
-import { api } from './api';
+import api from './api';
 
-const API_URL = '/api/featured-products';
+const API_URL = '/featured-products';
 
 export const getFeaturedProducts = async (includeInactive = false) => {
   try {

@@ -1,4 +1,4 @@
-import { api } from './api';
+import api from './api';
 
 // Remove mock data and use real data from the backend
 export const getDashboardData = async () => {
