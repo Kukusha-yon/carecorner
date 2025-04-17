@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getCurrentUser as getCurrentUserService,
@@ -6,7 +6,11 @@ import {
   register as registerService,
   logout as logoutService,
   updateProfile as updateProfileService,
-  changePassword as changePasswordService
+  changePassword as changePasswordService,
+  login as authLogin,
+  logout as authLogout,
+  getStoredUser,
+  isAuthenticated
 } from '../services/authService';
 import toast from 'react-hot-toast';
 
@@ -27,68 +31,23 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      console.log('Checking authentication status...');
-      const token = localStorage.getItem('token');
-      const refreshToken = localStorage.getItem('refreshToken');
-      
-      if (!token) {
-        console.log('No token found in localStorage');
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-      
-      console.log('Token found, verifying with server...');
-      try {
-        const user = await getCurrentUserService();
-        
-        if (user && user._id) {
-          console.log('User authenticated successfully:', user.email, 'Role:', user.role);
-          setUser(user);
-        } else {
-          console.log('Server returned invalid user data');
-          setUser(null);
-          // Clear invalid tokens
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-        }
-      } catch (authError) {
-        console.error('Auth verification failed:', authError);
-        setUser(null);
-        // Clear invalid tokens
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-      setError(error.message || 'Authentication check failed');
-    } finally {
-      setLoading(false);
+    // Check for stored user on mount
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
     }
-  };
+    setLoading(false);
+  }, []);
 
   const login = async (credentials) => {
     try {
       setError(null);
       setLoading(true);
-      
-      const response = await loginService(credentials);
-      
-      // Ensure we have a valid user object with role before setting state
-      if (response && response._id && response.role) {
-        console.log('Setting user with role:', response.role);
-        setUser(response);
-        return response;
-      } else {
-        throw new Error('Invalid user data received from server');
-      }
+      const response = await authLogin(credentials);
+      setUser(response.user);
+      navigate('/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       setError(error.message || 'Login failed');
       throw error;
     } finally {
@@ -106,15 +65,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await logoutService();
-      setUser(null);
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Failed to logout. Please try again.');
-    }
+  const logout = () => {
+    authLogout();
+    setUser(null);
+    navigate('/login');
   };
 
   const updateProfile = async (userData) => {
@@ -143,8 +97,15 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    changePassword
+    changePassword,
+    isAuthenticated: () => isAuthenticated()
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}; 
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+};
+
+export default AuthContext; 

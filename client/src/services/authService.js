@@ -117,14 +117,18 @@ export const getCurrentUser = async () => {
 export const login = async (credentials) => {
   try {
     const response = await api.post('/auth/login', credentials);
+    const { accessToken, refreshToken, user } = response.data;
     
     // Store tokens
-    localStorage.setItem('token', response.data.accessToken);
-    localStorage.setItem('refreshToken', response.data.refreshToken);
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    
+    // Store user info
+    localStorage.setItem('user', JSON.stringify(user));
     
     return response.data;
   } catch (error) {
-    throw error;
+    throw handleApiError(error);
   }
 };
 
@@ -148,17 +152,10 @@ export const register = async (userData) => {
   }
 };
 
-export const logout = async () => {
-  try {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    await api.post('/auth/logout');
-  } catch (error) {
-    console.error('Logout error:', error);
-    // Still remove tokens even if the server request fails
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-  }
+export const logout = () => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
 };
 
 export const updateProfile = async (userData) => {
@@ -226,6 +223,15 @@ export const refreshToken = async () => {
     localStorage.removeItem('refreshToken');
     throw new Error('Session expired. Please log in again.');
   }
+};
+
+export const getStoredUser = () => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
+export const isAuthenticated = () => {
+  return !!localStorage.getItem('accessToken');
 };
 
 export default api; 
