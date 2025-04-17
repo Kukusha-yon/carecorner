@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Get the API URL from environment variables, with fallbacks
 const API_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://your-backend-url.vercel.app/api' : 'http://localhost:5001/api');
+  (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -11,7 +11,11 @@ const publicRoutes = [
   '/products/featured',
   '/products/categories',
   '/featured-products',
-  '/partners'
+  '/partners',
+  '/api/featured-products',
+  '/api/new-arrivals',
+  '/products',
+  '/new-arrivals'
 ];
 
 const api = axios.create({

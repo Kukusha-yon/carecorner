@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bash build.sh",
+  "buildCommand": "npm run build:prod",
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
@@ -7,5 +7,11 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "https://carecorner-phi.vercel.app/api",
+    "VITE_APP_NAME": "CareCorner",
+    "VITE_APP_DESCRIPTION": "Your one-stop shop for electronics",
+    "VITE_APP_VERSION": "1.0.0"
+  }
 } 

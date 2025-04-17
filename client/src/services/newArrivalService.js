@@ -6,10 +6,12 @@ const API_URL = '/api/new-arrivals';
 export const getNewArrivals = async () => {
   try {
     const response = await api.get(API_URL);
-    return response.data;
+    // Ensure we always return an array
+    return Array.isArray(response.data) ? response.data : [];
   } catch (error) {
     console.error('Error fetching new arrivals:', error);
-    throw error;
+    // Return empty array on error to prevent UI errors
+    return [];
   }
 };
 

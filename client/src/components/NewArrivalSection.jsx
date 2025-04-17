@@ -20,6 +20,9 @@ const NewArrivalSection = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Ensure newArrivals is an array
+  const arrivalsArray = Array.isArray(newArrivals) ? newArrivals : [];
+
   if (isLoading) {
     return (
       <div className="w-full py-6 sm:py-8">
@@ -49,20 +52,20 @@ const NewArrivalSection = () => {
     return (
       <div className="w-full py-6 sm:py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center text-red-600">
-            Failed to load new arrivals. Please try again later.
+          <div className="text-center text-gray-500">
+            <p>Unable to load new arrivals. Please try again later.</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!newArrivals || newArrivals.length === 0) {
+  if (!arrivalsArray.length) {
     return (
       <div className="w-full py-6 sm:py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center text-gray-600">
-            No new arrivals available at the moment.
+          <div className="text-center text-gray-500">
+            <p>No new arrivals available at the moment.</p>
           </div>
         </div>
       </div>
@@ -91,49 +94,20 @@ const NewArrivalSection = () => {
         <Swiper
           ref={swiperRef}
           modules={[Autoplay, Pagination, Navigation, FreeMode]}
-          spaceBetween={12}
-          slidesPerView={1.2}
-          centeredSlides={false}
-          freeMode={{
-            enabled: true,
-            momentum: true,
-            momentumRatio: 0.5,
-            momentumVelocityRatio: 0.5,
-          }}
-          pagination={{ 
-            clickable: true,
-            dynamicBullets: true
-          }}
-          navigation={{
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          }}
-          autoplay={{
-            delay: 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
+          spaceBetween={20}
+          slidesPerView={1}
           breakpoints={{
-            480: {
-              slidesPerView: 1.5,
-              spaceBetween: 16,
-            },
-            640: {
-              slidesPerView: 2.2,
-              spaceBetween: 20,
-            },
-            768: {
-              slidesPerView: 3.2,
-              spaceBetween: 24,
-            },
-            1024: {
-              slidesPerView: 4.2,
-              spaceBetween: 30,
-            },
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
           }}
-          className="pb-10 sm:pb-12"
+          autoplay={!isPaused ? { delay: 3000, disableOnInteraction: false } : false}
+          pagination={{ clickable: true }}
+          navigation
+          freeMode={{ momentum: true }}
+          className="w-full"
         >
-          {newArrivals.map((newArrival) => (
+          {arrivalsArray.map((newArrival) => (
             <SwiperSlide key={newArrival._id}>
               <Link
                 to={`/new-arrivals/${newArrival._id}`}

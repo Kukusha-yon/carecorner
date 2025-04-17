@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
+import checkEnvironmentVariables from './utils/envCheck';
 
 
 
@@ -166,6 +167,11 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
+  // Check environment variables on app initialization
+  useEffect(() => {
+    checkEnvironmentVariables();
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
