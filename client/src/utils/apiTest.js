@@ -21,7 +21,7 @@ export const testApi = async () => {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      withCredentials: true
+      withCredentials: false // Set to false to avoid CORS issues
     });
     
     console.log('Health endpoint response:', healthResponse.data);
