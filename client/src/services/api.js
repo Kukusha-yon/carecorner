@@ -1,20 +1,26 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Get the API URL from environment variables, with fallbacks
+const API_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.PROD ? 'https://your-backend-url.vercel.app/api' : 'http://localhost:5001/api');
 
 // Define public routes that don't require authentication
 const publicRoutes = [
   '/external/stock-data',
   '/external/news',
   '/products/featured',
-  '/products/categories'
+  '/products/categories',
+  '/featured-products',
+  '/partners'
 ];
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Add timeout to prevent hanging requests
+  timeout: 10000
 });
 
 // Add a request interceptor to add the auth token to requests
