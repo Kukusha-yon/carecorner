@@ -70,9 +70,8 @@ app.use(cors({
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:5173',
-      'https://carecorner-phi.vercel.app',
       'https://carecorner-bl2n.vercel.app',
-      'https://carecorner-bl2n-5ig0zu2eu-yonatans-projects-2f1159da.vercel.app'
+      'https://carecorner-bl2n-9thaviglq-yonatans-projects-2f1159da.vercel.app'
     ];
     
     // Check if the origin is in the allowed list
