@@ -24,6 +24,7 @@ import apiRoutes from './routes/apiRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import { initializeSettings } from './controllers/settingController.js';
 import newArrivalRoutes from './routes/newArrivalRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
 
 // Create Express app
 const app = express();
@@ -114,6 +115,7 @@ app.use('/api/featured-products', featuredProductRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/external', apiRoutes);
 app.use('/api/new-arrivals', newArrivalRoutes);
+app.use('/api/health', healthRoutes);
 
 // Error handling
 app.use(errorHandler);

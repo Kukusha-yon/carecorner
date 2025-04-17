@@ -69,6 +69,12 @@ api.interceptors.response.use(
       data: response.data
     });
     
+    // Check if the response is HTML instead of JSON
+    if (typeof response.data === 'string' && response.data.includes('<!doctype html>')) {
+      console.error('Received HTML instead of JSON from API:', response.config.url);
+      return Promise.reject(new Error('API returned HTML instead of JSON. This usually means the API endpoint is not available.'));
+    }
+    
     // Check if the response contains a new token
     const newToken = response.headers['x-new-token'];
     if (newToken) {

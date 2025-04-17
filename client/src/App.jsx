@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -12,6 +12,7 @@ import { AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import checkEnvironmentVariables from './utils/envCheck';
+import checkApiHealth from './services/healthService';
 
 
 
@@ -167,9 +168,29 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => {
-  // Check environment variables on app initialization
+  const [apiHealthy, setApiHealthy] = useState(true);
+  
+  // Check environment variables and API health on app initialization
   useEffect(() => {
-    checkEnvironmentVariables();
+    const initializeApp = async () => {
+      // Check environment variables
+      checkEnvironmentVariables();
+      
+      // Check API health
+      try {
+        const isHealthy = await checkApiHealth();
+        setApiHealthy(isHealthy);
+        
+        if (!isHealthy) {
+          console.error('API is not healthy. Some features may not work correctly.');
+        }
+      } catch (error) {
+        console.error('Failed to check API health:', error);
+        setApiHealthy(false);
+      }
+    };
+    
+    initializeApp();
   }, []);
 
   return (
@@ -180,6 +201,12 @@ const App = () => {
             <CartProvider>
               <ScrollToTop />
               <div className="min-h-screen bg-gray-50">
+                {!apiHealthy && (
+                  <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                    <p className="font-bold">API Connection Issue</p>
+                    <p>We're having trouble connecting to our servers. Some features may not work correctly.</p>
+                  </div>
+                )}
                 <AnimatedRoutes />
                 <Toaster position="top-right" />
               </div>
