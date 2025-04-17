@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendEmail } from '../utils/emailService.js';
 import rateLimit from 'express-rate-limit';
+import mongoose from 'mongoose';
 
 // Create rate limiter using in-memory storage
 const loginLimiter = rateLimit({
@@ -63,8 +64,28 @@ export const login = async (req, res) => {
       });
     }
 
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      console.error('Login failed: Database connection not ready. State:', mongoose.connection.readyState);
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection error',
+        error: 'Database connection not ready'
+      });
+    }
+
     // Find user by email
-    const user = await User.findOne({ email }).select('+password');
+    let user;
+    try {
+      user = await User.findOne({ email }).select('+password');
+    } catch (dbError) {
+      console.error('Database error during user lookup:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error during user lookup',
+        error: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+      });
+    }
 
     if (!user) {
       console.log('Login failed: User not found for email:', email);
@@ -75,7 +96,17 @@ export const login = async (req, res) => {
     }
 
     // Check if password matches
-    const isMatch = await user.matchPassword(password);
+    let isMatch;
+    try {
+      isMatch = await user.comparePassword(password);
+    } catch (passwordError) {
+      console.error('Error during password comparison:', passwordError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error during password verification',
+        error: process.env.NODE_ENV === 'development' ? passwordError.message : undefined
+      });
+    }
 
     if (!isMatch) {
       console.log('Login failed: Invalid password for user:', email);
@@ -90,40 +121,67 @@ export const login = async (req, res) => {
       console.error('Login failed: JWT_SECRET is not defined');
       return res.status(500).json({
         success: false,
-        message: 'Server configuration error'
+        message: 'Server configuration error',
+        error: 'JWT_SECRET is not defined'
       });
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
-    );
+    let token;
+    try {
+      token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRE }
+      );
+    } catch (tokenError) {
+      console.error('Error generating JWT token:', tokenError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error generating authentication token',
+        error: process.env.NODE_ENV === 'development' ? tokenError.message : undefined
+      });
+    }
 
     // Check if refresh token secret is available
     if (!process.env.JWT_REFRESH_SECRET) {
       console.error('Login failed: JWT_REFRESH_SECRET is not defined');
       return res.status(500).json({
         success: false,
-        message: 'Server configuration error'
+        message: 'Server configuration error',
+        error: 'JWT_REFRESH_SECRET is not defined'
       });
     }
 
     // Generate refresh token
-    const refreshToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRE }
-    );
+    let refreshToken;
+    try {
+      refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_EXPIRE }
+      );
+    } catch (refreshTokenError) {
+      console.error('Error generating refresh token:', refreshTokenError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error generating refresh token',
+        error: process.env.NODE_ENV === 'development' ? refreshTokenError.message : undefined
+      });
+    }
 
     // Set refresh token in HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    try {
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+    } catch (cookieError) {
+      console.error('Error setting cookie:', cookieError);
+      // Continue without the cookie, the token is still in the response
+    }
 
     console.log('Login successful for user:', email);
 
