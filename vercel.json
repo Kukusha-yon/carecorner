@@ -53,5 +53,8 @@
     "CLIENT_URL": "@client_url",
     "ALPHA_VANTAGE_API_KEY": "@alpha_vantage_api_key",
     "NEWSDATA_API_KEY": "@newsdata_api_key"
-  }
+  },
+  "includeFiles": [
+    "server/**/*"
+  ]
 } 
