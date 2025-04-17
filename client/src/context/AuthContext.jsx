@@ -1,18 +1,37 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import authService from '../services/authService';
+import {
+  getCurrentUser as getCurrentUserService,
+  login as loginService,
+  register as registerService,
+  logout as logoutService,
+  updateProfile as updateProfileService,
+  changePassword as changePasswordService,
+  login as authLogin,
+  logout as authLogout,
+  getStoredUser,
+  isAuthenticated
+} from '../services/authService';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = authService.getStoredUser();
+    // Check for stored user on mount
+    const storedUser = getStoredUser();
     if (storedUser) {
       setUser(storedUser);
     }
@@ -21,16 +40,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      setLoading(true);
-      const response = await authService.login(email, password);
+      const response = await authLogin(email, password);
       const { user, token } = response.data;
       
+      // Store user and token
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('token', token);
       
       setUser(user);
       setLoading(false);
       
+      // Navigate based on role
       if (user.role === 'admin') {
         navigate('/admin/dashboard');
       } else {
@@ -44,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await authService.register(userData);
+      const response = await registerService(userData);
       // Don't set the user or tokens here, just return success
       return response;
     } catch (error) {
@@ -53,14 +73,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    authService.logout();
+    authLogout();
     setUser(null);
     navigate('/login');
   };
 
   const updateProfile = async (userData) => {
     try {
-      const updatedUser = await authService.updateProfile(userData);
+      const updatedUser = await updateProfileService(userData);
       setUser(updatedUser);
       return updatedUser;
     } catch (error) {
@@ -70,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   const changePassword = async (passwordData) => {
     try {
-      await authService.changePassword(passwordData);
+      await changePasswordService(passwordData);
     } catch (error) {
       throw error;
     }
@@ -79,13 +99,12 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
-    error,
     login,
     register,
     logout,
     updateProfile,
     changePassword,
-    isAuthenticated: authService.isAuthenticated
+    isAuthenticated: () => isAuthenticated()
   };
 
   return (
@@ -93,14 +112,6 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };
 
 export default AuthContext; 
