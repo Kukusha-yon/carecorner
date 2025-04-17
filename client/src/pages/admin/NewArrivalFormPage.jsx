@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import NewArrivalForm from '../../components/admin/NewArrivalForm';
-import { getNewArrivalById, createNewArrival, updateNewArrival } from '../../services/newArrivalService';
+import { getNewArrival, createNewArrival, updateNewArrival } from '../../services/newArrivalService';
 import Spinner from '../../components/common/Spinner';
 
 const NewArrivalFormPage = () => {
@@ -17,7 +17,7 @@ const NewArrivalFormPage = () => {
   // Fetch existing new arrival if editing
   const { data: existingNewArrival, isLoading: isLoadingNewArrival } = useQuery({
     queryKey: ['newArrival', id],
-    queryFn: () => getNewArrivalById(id),
+    queryFn: () => getNewArrival(id),
     enabled: isEditing,
   });
 
