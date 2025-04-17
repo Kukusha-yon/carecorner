@@ -4,11 +4,21 @@ import api from './api';
 export const login = async (email, password) => {
   try {
     const response = await api.post('/auth/login', { email, password });
-    if (response.data.token) {
+    
+    // Check if response has the expected structure
+    if (response.data && response.data.token) {
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Only store user data if it exists
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response.data;
+    } else {
+      console.error('Login response missing token:', response.data);
+      throw new Error('Invalid login response format');
     }
-    return response.data;
   } catch (error) {
     console.error('Login error:', error);
     throw error;

@@ -27,6 +27,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,24 +41,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await authLogin(email, password);
-      const { user, token } = response.data;
+      setLoading(true);
+      const data = await authLogin(email, password);
       
-      // Store user and token
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('token', token);
+      // Validate the response data
+      if (!data || !data.token) {
+        throw new Error('Invalid login response');
+      }
       
-      setUser(user);
+      setUser(data.user || null);
       setLoading(false);
       
-      // Navigate based on role
-      if (user.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/profile-settings');
-      }
+      // Use navigate with replace to avoid history stack issues
+      navigate('/dashboard', { replace: true });
+      
+      return data;
     } catch (error) {
       setLoading(false);
+      setError(error.message || 'Login failed');
       throw error;
     }
   };
@@ -99,6 +100,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    error,
     login,
     register,
     logout,

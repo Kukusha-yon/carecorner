@@ -48,20 +48,35 @@ api.interceptors.response.use(
           withCredentials: true
         });
         
-        if (response.data.token) {
+        if (response.data && response.data.token) {
           localStorage.setItem('token', response.data.token);
           originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
           return api(originalRequest);
+        } else {
+          throw new Error('Invalid refresh token response');
         }
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
         // Clear local storage and redirect to login
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        
+        // Only redirect if we're not already on the login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        
         return Promise.reject(refreshError);
       }
     }
+    
+    // Log the error for debugging
+    console.error('API Error:', {
+      url: originalRequest.url,
+      method: originalRequest.method,
+      status: error.response?.status,
+      message: error.message
+    });
     
     return Promise.reject(error);
   }
