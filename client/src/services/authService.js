@@ -1,99 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-
-// Create axios instance with default config
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve();
-    }
-  });
-  failedQueue = [];
-};
-
-// Add a request interceptor
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Add a response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // If error is not 401 or request has already been retried, reject
-    if (error.response?.status !== 401 || originalRequest._retry) {
-      return Promise.reject(error);
-    }
-
-    if (isRefreshing) {
-      // If token refresh is in progress, add request to queue
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      })
-        .then(() => api(originalRequest))
-        .catch((err) => Promise.reject(err));
-    }
-
-    originalRequest._retry = true;
-    isRefreshing = true;
-
-    try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await api.post('/auth/refresh-token', { refreshToken });
-      
-      // Extract tokens correctly from the response
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      
-      if (accessToken) {
-        localStorage.setItem('token', accessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      }
-      
-      if (newRefreshToken) {
-        localStorage.setItem('refreshToken', newRefreshToken);
-      }
-
-      processQueue(null);
-      return api(originalRequest);
-    } catch (error) {
-      processQueue(error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
-      return Promise.reject(error);
-    } finally {
-      isRefreshing = false;
-    }
-  }
-);
+import api from './api';
 
 export const getCurrentUser = async () => {
   try {
@@ -110,7 +15,7 @@ export const getCurrentUser = async () => {
       localStorage.removeItem('refreshToken');
       return null;
     }
-    throw new Error(error.response?.data?.message || 'Failed to get user data');
+    throw error;
   }
 };
 
@@ -119,41 +24,27 @@ export const login = async (credentials) => {
     const response = await api.post('/auth/login', credentials);
     const { accessToken, refreshToken, user } = response.data;
     
-    // Store tokens
-    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('token', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    
-    // Store user info
     localStorage.setItem('user', JSON.stringify(user));
     
     return response.data;
   } catch (error) {
-    throw handleApiError(error);
+    throw error;
   }
 };
 
 export const register = async (userData) => {
   try {
     const response = await api.post('/auth/register', userData);
-    
-    // Store tokens
-    localStorage.setItem('token', response.data.accessToken);
-    localStorage.setItem('refreshToken', response.data.refreshToken);
-    
-    // Return user data
-    return {
-      _id: response.data._id,
-      name: response.data.name,
-      email: response.data.email,
-      role: response.data.role
-    };
+    return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Registration failed');
+    throw error;
   }
 };
 
 export const logout = () => {
-  localStorage.removeItem('accessToken');
+  localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('user');
 };
@@ -163,15 +54,16 @@ export const updateProfile = async (userData) => {
     const response = await api.put('/auth/profile', userData);
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to update profile');
+    throw error;
   }
 };
 
 export const changePassword = async (passwordData) => {
   try {
-    await api.put('/auth/change-password', passwordData);
+    const response = await api.put('/auth/change-password', passwordData);
+    return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || 'Failed to change password');
+    throw error;
   }
 };
 
@@ -231,7 +123,5 @@ export const getStoredUser = () => {
 };
 
 export const isAuthenticated = () => {
-  return !!localStorage.getItem('accessToken');
-};
-
-export default api; 
+  return !!localStorage.getItem('token');
+}; 

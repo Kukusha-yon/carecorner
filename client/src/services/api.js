@@ -2,10 +2,6 @@ import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-console.log('API URL:', apiUrl);
-console.log('Environment:', import.meta.env.MODE);
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-
 const api = axios.create({
   baseURL: apiUrl,
   headers: {
@@ -18,7 +14,7 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -50,14 +46,14 @@ api.interceptors.response.use(
         });
 
         const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('token', accessToken);
 
         // Retry the original request with new token
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         // If refresh token fails, logout user
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         window.location.href = '/login';
