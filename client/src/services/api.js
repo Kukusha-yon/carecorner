@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Get the API URL from environment variables, with fallbacks
 const API_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://carecorner-phi.vercel.app/api' : 'http://localhost:5001/api');
+  (import.meta.env.PROD ? 'https://carecorner-bl2n.vercel.app/api' : 'http://localhost:5001/api');
 
 console.log('API URL:', API_URL);
 console.log('Environment:', import.meta.env.MODE);
