@@ -54,9 +54,14 @@ export const protect = asyncHandler(async (req, res, next) => {
 
 // @desc    Admin middleware
 export const admin = asyncHandler(async (req, res, next) => {
+  console.log('Admin middleware called for path:', req.originalUrl);
+  console.log('User in admin middleware:', req.user ? { id: req.user._id, role: req.user.role } : 'No user');
+  
   if (req.user && req.user.role === 'admin') {
+    console.log('User is admin, proceeding');
     next();
   } else {
+    console.log('User is not admin, returning 403');
     throw new AppError('Not authorized as an admin', 403);
   }
 }); 

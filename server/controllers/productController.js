@@ -11,9 +11,20 @@ import FeaturedProduct from '../models/FeaturedProduct.js';
 export const getProducts = asyncHandler(async (req, res) => {
   try {
     console.log('Fetching products with query:', req.query);
+    console.log('Request headers:', req.headers);
+    console.log('User from request:', req.user ? { id: req.user._id, role: req.user.role } : 'No user');
     
-    const { category, sort, search } = req.query;
+    const { category, sort, search, admin } = req.query;
     let query = {};
+    
+    // If admin parameter is true and user is authenticated as admin, return all products
+    if (admin === 'true' && req.user && req.user.role === 'admin') {
+      console.log('Admin request detected, returning all products');
+      // No additional query filters for admin
+    } else {
+      // For non-admin requests, only return active products
+      query.isActive = true;
+    }
     
     if (category) {
       query.category = category;

@@ -51,7 +51,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://carecorner-phi.vercel.app", "https://carecorner-bl2n.vercel.app"]
+      connectSrc: ["'self'", process.env.CLIENT_URL || "http://localhost:3000"]
     }
   }
 }));
@@ -59,11 +59,7 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://carecorner-bl2n.vercel.app',
-        'https://carecorner-phi.vercel.app',
-        'https://carecorner-qb12nr5ne-yonatans-projects-2f1159da.vercel.app'
-      ] 
+    ? [process.env.CLIENT_URL] 
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -140,4 +136,11 @@ app.use((req, res) => {
 initializeSettings();
 
 // Export the Express API
-export default app; 
+export default app;
+
+// Start the server
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV}`);
+}); 

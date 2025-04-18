@@ -52,6 +52,12 @@ const isPasswordComplex = (password) => {
 // @access  Public
 export const login = async (req, res) => {
   try {
+    console.log('Login request received:', {
+      email: req.body.email ? 'provided' : 'missing',
+      password: req.body.password ? 'provided' : 'missing',
+      body: JSON.stringify(req.body)
+    });
+    
     const { email, password } = req.body;
     console.log('Login attempt for:', email);
 
@@ -65,6 +71,7 @@ export const login = async (req, res) => {
     }
 
     // Check database connection
+    console.log('Database connection state:', mongoose.connection.readyState);
     if (mongoose.connection.readyState !== 1) {
       console.error('Login failed: Database connection not ready. State:', mongoose.connection.readyState);
       return res.status(500).json({
@@ -77,7 +84,9 @@ export const login = async (req, res) => {
     // Find user by email
     let user;
     try {
+      console.log('Looking up user with email:', email);
       user = await User.findOne({ email }).select('+password');
+      console.log('User lookup result:', user ? 'User found' : 'User not found');
     } catch (dbError) {
       console.error('Database error during user lookup:', dbError);
       return res.status(500).json({
@@ -98,7 +107,9 @@ export const login = async (req, res) => {
     // Check if password matches
     let isMatch;
     try {
+      console.log('Comparing password for user:', email);
       isMatch = await user.comparePassword(password);
+      console.log('Password comparison result:', isMatch ? 'Password matches' : 'Password does not match');
     } catch (passwordError) {
       console.error('Error during password comparison:', passwordError);
       return res.status(500).json({
@@ -117,6 +128,7 @@ export const login = async (req, res) => {
     }
 
     // Check if JWT secret is available
+    console.log('JWT_SECRET available:', !!process.env.JWT_SECRET);
     if (!process.env.JWT_SECRET) {
       console.error('Login failed: JWT_SECRET is not defined');
       return res.status(500).json({
@@ -129,11 +141,13 @@ export const login = async (req, res) => {
     // Generate JWT token
     let token;
     try {
+      console.log('Generating JWT token for user:', email);
       token = jwt.sign(
-        { id: user._id, role: user.role },
+        { userId: user._id, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRE }
+        { expiresIn: process.env.JWT_EXPIRE || '30d' }
       );
+      console.log('JWT token generated successfully');
     } catch (tokenError) {
       console.error('Error generating JWT token:', tokenError);
       return res.status(500).json({
@@ -144,6 +158,7 @@ export const login = async (req, res) => {
     }
 
     // Check if refresh token secret is available
+    console.log('JWT_REFRESH_SECRET available:', !!process.env.JWT_REFRESH_SECRET);
     if (!process.env.JWT_REFRESH_SECRET) {
       console.error('Login failed: JWT_REFRESH_SECRET is not defined');
       return res.status(500).json({
@@ -156,11 +171,13 @@ export const login = async (req, res) => {
     // Generate refresh token
     let refreshToken;
     try {
+      console.log('Generating refresh token for user:', email);
       refreshToken = jwt.sign(
         { id: user._id },
         process.env.JWT_REFRESH_SECRET,
         { expiresIn: process.env.JWT_REFRESH_EXPIRE }
       );
+      console.log('Refresh token generated successfully');
     } catch (refreshTokenError) {
       console.error('Error generating refresh token:', refreshTokenError);
       return res.status(500).json({
@@ -172,12 +189,14 @@ export const login = async (req, res) => {
 
     // Set refresh token in HTTP-only cookie
     try {
+      console.log('Setting refresh token cookie');
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
+      console.log('Refresh token cookie set successfully');
     } catch (cookieError) {
       console.error('Error setting cookie:', cookieError);
       // Continue without the cookie, the token is still in the response
