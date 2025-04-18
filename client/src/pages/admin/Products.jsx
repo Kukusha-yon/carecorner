@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getProducts, deleteProduct, updateProduct } from '../../services/productService';
 import { toast } from 'react-hot-toast';
 import { PRODUCT_CATEGORIES } from '../../services/productService';
-import { useAuth } from '../../context/AuthContext';
 import { 
   Search, 
   Plus, 
@@ -22,7 +21,6 @@ import {
 const Products = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [sortField, setSortField] = useState('name');
@@ -33,56 +31,39 @@ const Products = () => {
 
   // Check if the user is logged in and has the correct role
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        console.log('User not authenticated, redirecting to login');
-        navigate('/login');
-      } else if (user.role !== 'admin') {
-        console.log('User is not an admin, redirecting to home');
-        navigate('/');
-      }
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    console.log('Authentication check:', {
+      token: token ? 'Present' : 'Missing',
+      user: user ? 'Present' : 'Missing',
+      role: user?.role
+    });
+    
+    if (!token || !user || user.role !== 'admin') {
+      console.log('User not authenticated or not an admin, redirecting to login');
+      navigate('/login');
     }
-  }, [user, loading, navigate]);
+  }, [navigate]);
 
   const { data: productsData, isLoading, error } = useQuery({
     queryKey: ['products', 'admin'],
     queryFn: async () => {
       console.log('Fetching products with admin parameter');
-      const result = await getProducts({ admin: true });
-      console.log('Products data received:', result);
-      return result;
+      try {
+        const result = await getProducts({ admin: true });
+        console.log('Products data received:', result);
+        return result;
+      } catch (error) {
+        console.error('Error in Products component queryFn:', error);
+        throw error;
+      }
     },
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
-    enabled: !!user && user.role === 'admin'
   });
 
-  console.log('Products data in component:', productsData);
-  const products = productsData?.products || [];
-  console.log('Processed products array:', products);
-
-  if (products.length === 0 && !isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
-            <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
-            <Link
-              to="/admin/products/new"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add New Product
-            </Link>
-          </div>
-          <div className="text-center py-8">
-            <p className="text-gray-500">No products found. Add a new product to get started.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Define all mutations before any conditional returns
   const deleteMutation = useMutation({
     mutationFn: deleteProduct,
     onSuccess: () => {
@@ -122,6 +103,22 @@ const Products = () => {
     }
   });
 
+  // Process data
+  console.log('Products data in component:', productsData);
+  
+  // Handle different response formats
+  let products = [];
+  if (Array.isArray(productsData)) {
+    // If the response is directly an array of products
+    products = productsData;
+  } else if (productsData && typeof productsData === 'object') {
+    // If the response has a products property
+    products = productsData.products || [];
+  }
+  
+  console.log('Processed products array:', products);
+
+  // Handle functions
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
@@ -168,6 +165,29 @@ const Products = () => {
       console.error('Error toggling status:', error);
     }
   };
+
+  // Render empty state if needed
+  if (products.length === 0 && !isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
+            <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
+            <Link
+              to="/admin/products/new"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Add New Product
+            </Link>
+          </div>
+          <div className="text-center py-8">
+            <p className="text-gray-500">No products found. Add a new product to get started.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const filteredProducts = products.filter(product => {
     if (!product || !product.name || !product.category) {

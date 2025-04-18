@@ -13,12 +13,30 @@ import NewArrivalSection from '../components/NewArrivalSection';
 
 const heroSlides = [
   {
+    title: 'Outdoor LED Display Screens',
+    subtitle: 'Make Your Message Stand Out',
+    description: 'High-brightness outdoor LED displays perfect for billboards, stadiums, and outdoor advertising. Weather-resistant and visible in all conditions.',
+    image: 'https://www.mpleddisplay.com/uploads/8f8a7a06.jpg',
+    cta: 'Explore Outdoor Displays',
+    link: '/products?category=outdoor-led-displays',
+    theme: 'dark'
+  },
+  {
     title: 'CISCO Network Solutions',
     subtitle: 'Enterprise-Grade Networking',
     description: 'Discover our comprehensive range of CISCO switches and networking equipment for your business needs.',
     image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80',
     cta: 'Explore Network Solutions',
     link: '/products?category=cisco',
+    theme: 'light'
+  },
+  {
+    title: 'Indoor LED Video Walls',
+    subtitle: 'Immersive Visual Experiences',
+    description: 'Crystal-clear indoor LED video walls for retail, corporate lobbies, and entertainment venues. Create stunning visual displays that captivate audiences.',
+    image: 'https://cdn.globalso.com/yonwaytech/yonwaytech-indoor-fixed-pillar-p2.5-led-display.jpg',
+    cta: 'View Video Walls',
+    link: '/products?category=indoor-led-walls',
     theme: 'dark'
   },
   {
@@ -31,12 +49,30 @@ const heroSlides = [
     theme: 'light'
   },
   {
+    title: 'Rental LED Screens',
+    subtitle: 'Flexible Event Solutions',
+    description: 'Portable and modular LED screens for events, concerts, and temporary installations. Easy setup and stunning visuals for any occasion.',
+    image: 'https://www.eagerled.com/wp-content/uploads/2022/08/640C2-1.jpg',
+    cta: 'Discover Rental Options',
+    link: '/products?category=rental-led-screens',
+    theme: 'dark'
+  },
+  {
     title: 'Professional Monitors',
     subtitle: 'Crystal Clear Display',
     description: 'High-resolution monitors for enhanced productivity and immersive viewing experience.',
     image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&q=80',
     cta: 'Browse Monitors',
     link: '/products?category=monitors',
+    theme: 'light'
+  },
+  {
+    title: 'Transparent LED Displays',
+    subtitle: 'See-Through Innovation',
+    description: 'Revolutionary transparent LED technology that allows light to pass through while displaying vibrant content. Perfect for retail windows and architectural installations.',
+    image: 'https://static.wixstatic.com/media/6515c6_b1a192472949445998a3bbfc7259ce75~mv2.png/v1/fill/w_1920,h_1080,al_c/6515c6_b1a192472949445998a3bbfc7259ce75~mv2.png',
+    cta: 'Explore Transparent LEDs',
+    link: '/products?category=transparent-leds',
     theme: 'dark'
   },
   {
@@ -44,8 +80,17 @@ const heroSlides = [
     subtitle: 'Premium Peripherals',
     description: 'Experience the perfect blend of comfort and performance with our premium Logitech accessories.',
     image: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&q=80',
-    cta: 'Explore Logitech',
+    cta: 'LED Outdoor',
     link: '/products?category=logitech',
+    theme: 'dark'
+  },
+  {
+    title: 'HS LED Outdoor Signs for Business',
+    subtitle: 'Hang on the wall, Hang in the air',
+    description: "HS LED Outdoor Signs for Business P6 40''x17'', WiFi Scrolling Programmable, Digital Electronic Message Board for Advertising, Menu Board for Restaurant, Tunemax LED Display for Sports Ticker.",
+    image: 'https://www.colorlight-led.com/wp-content/uploads/2024/05/fixed-installation-LED-display-1.webp',
+    cta: 'Shop Bags',
+    link: '/products?category=transparent-leds',
     theme: 'light'
   },
   {
@@ -55,7 +100,7 @@ const heroSlides = [
     image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80',
     cta: 'Shop Bags',
     link: '/products?category=bags',
-    theme: 'dark'
+    theme: 'light'
   }
 ];
 
@@ -138,7 +183,7 @@ const Home = () => {
   return (
     <PageTransition>
       {/* Hero Section */}
-      <section className="relative w-screen h-[80vh] sm:h-[90vh] md:h-[100vh] overflow-hidden -mt-16 -mx-[calc(50vw-50%)]">
+      <section className="relative w-screen h-[80vh] md:h-[90vh] overflow-hidden -mt-16 -mx-[calc(50vw-50%)]">
         {heroSlides.map((slide, index) => (
           <div
             key={index}
@@ -155,7 +200,9 @@ const Home = () => {
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   width: '100vw',
-                  height: '100%'
+                  height: '100%',
+                  objectFit: 'cover',
+                  aspectRatio: '16/9'
                 }}
               />
             </div>
@@ -164,8 +211,8 @@ const Home = () => {
             <div
               className={`absolute inset-0 ${
                 slide.theme === 'dark'
-                  ? 'bg-black/60'
-                  : 'bg-white/60'
+                  ? 'bg-black/20'
+                  : 'bg-white/20'
               }`}
             />
 
@@ -313,6 +360,82 @@ const Home = () => {
               <p className="text-gray-600">No featured products available.</p>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* LED Display Solutions Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">LED Display Solutions</h2>
+          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">Discover our comprehensive range of indoor and outdoor LED display solutions tailored for your specific needs.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Indoor LED Display Section */}
+            <div className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="relative h-[500px] flex items-center justify-center bg-gray-100">
+                <img
+                  src="https://untsmart.com/cdn/shop/products/leddisplayposter.jpg?v=1703142468"
+                  alt="Indoor LED Display"
+                  className="w-full h-full object-contain transform transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                  <h3 className="text-2xl font-bold mb-3">Indoor LED Displays</h3>
+                  <p className="text-gray-200 mb-6">
+                    High-resolution indoor LED displays perfect for retail spaces, corporate environments, and entertainment venues. Crystal-clear visuals with seamless integration.
+                  </p>
+                  <div className="flex flex-col gap-2 text-white">
+                    <p className="text-lg font-semibold">Contact Information:</p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Phone:</span>
+                      <span>+251 911 123 456</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Email:</span>
+                      <span>info@carecorner.com</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Address:</span>
+                      <span>Addis Ababa, Ethiopia</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Outdoor LED Display Section */}
+            <div className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="relative h-[500px] flex items-center justify-center bg-gray-100">
+                <img
+                  src="https://m.advertisementleddisplay.com/photo/pt33003019-100000h_outdoor_advertising_led_displays_p5mm_stadium_big_screen.jpg"
+                  alt="Outdoor LED Display"
+                  className="w-full h-full object-contain transform transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                  <h3 className="text-2xl font-bold mb-3">Outdoor LED Displays</h3>
+                  <p className="text-gray-200 mb-6">
+                    Weather-resistant outdoor LED displays designed for maximum visibility in any condition. Perfect for billboards, stadiums, and outdoor advertising.
+                  </p>
+                  <div className="flex flex-col gap-2 text-white">
+                    <p className="text-lg font-semibold">Contact Information:</p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Phone:</span>
+                      <span>+251 911 123 456</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Email:</span>
+                      <span>info@carecorner.com</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span className="text-gray-300">Address:</span>
+                      <span>Addis Ababa, Ethiopia</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

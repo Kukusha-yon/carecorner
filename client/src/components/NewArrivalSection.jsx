@@ -23,6 +23,16 @@ const NewArrivalSection = () => {
   // Ensure newArrivals is an array
   const arrivalsArray = Array.isArray(newArrivals) ? newArrivals : [];
 
+  const handleButtonClick = (direction) => {
+    if (swiperRef.current && swiperRef.current.swiper) {
+      if (direction === 'next') {
+        swiperRef.current.swiper.slideNext();
+      } else {
+        swiperRef.current.swiper.slidePrev();
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="w-full py-6 sm:py-8">
@@ -87,7 +97,7 @@ const NewArrivalSection = () => {
       </div>
 
       <div 
-        className="relative w-full"
+        className="relative w-full group"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
@@ -101,11 +111,19 @@ const NewArrivalSection = () => {
             768: { slidesPerView: 3 },
             1024: { slidesPerView: 4 },
           }}
-          autoplay={!isPaused ? { delay: 3000, disableOnInteraction: false } : false}
-          pagination={{ clickable: true }}
-          navigation
+          autoplay={{
+            delay: 3000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true
+          }}
+          pagination={{ 
+            clickable: true,
+            bulletClass: 'swiper-pagination-bullet !bg-primary/50',
+            bulletActiveClass: 'swiper-pagination-bullet-active !bg-primary'
+          }}
+          navigation={false}
           freeMode={{ momentum: true }}
-          className="w-full"
+          className="w-full pb-12"
         >
           {arrivalsArray.map((newArrival) => (
             <SwiperSlide key={newArrival._id}>
@@ -115,13 +133,13 @@ const NewArrivalSection = () => {
               >
                 <motion.div
                   whileHover={{ y: -5 }}
-                  className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col"
+                  className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col transition-shadow duration-300 hover:shadow-lg"
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden group">
                     <img
                       src={newArrival.image}
                       alt={newArrival.name}
-                      className="w-full h-full object-cover object-center"
+                      className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         e.target.src = 'https://placehold.co/400x200?text=No+Image';
                       }}
@@ -148,8 +166,14 @@ const NewArrivalSection = () => {
               </Link>
             </SwiperSlide>
           ))}
-          <div className="swiper-button-next !text-[#39b54a] !right-2 !bottom-16 sm:!bottom-14 !w-8 sm:!w-10 !h-8 sm:!h-10 !bg-white/80 !rounded-full"></div>
-          <div className="swiper-button-prev !text-[#39b54a] !left-2 !bottom-16 sm:!bottom-14 !w-8 sm:!w-10 !h-8 sm:!h-10 !bg-white/80 !rounded-full"></div>
+          <button 
+            onClick={() => handleButtonClick('prev')}
+            className="swiper-button-prev !text-primary !left-2 !bottom-16 sm:!bottom-14 !w-8 sm:!w-10 !h-8 sm:!h-10 !bg-white/80 !rounded-full !transition-opacity !duration-300 !opacity-0 group-hover:!opacity-100 !transform-none hover:!bg-white hover:!shadow-md !z-10 !border-none !outline-none !cursor-pointer"
+          />
+          <button 
+            onClick={() => handleButtonClick('next')}
+            className="swiper-button-next !text-primary !right-2 !bottom-16 sm:!bottom-14 !w-8 sm:!w-10 !h-8 sm:!h-10 !bg-white/80 !rounded-full !transition-opacity !duration-300 !opacity-0 group-hover:!opacity-100 !transform-none hover:!bg-white hover:!shadow-md !z-10 !border-none !outline-none !cursor-pointer"
+          />
         </Swiper>
       </div>
     </div>

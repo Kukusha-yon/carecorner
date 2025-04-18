@@ -35,7 +35,7 @@ const Bags = lazy(() => import('./pages/Bags'));
 const Charger = lazy(() => import('./pages/Charger'));
 
 // Admin Pages
-const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Products = lazy(() => import('./pages/admin/Products'));
 const NewProduct = lazy(() => import('./pages/admin/NewProduct'));
 const EditProduct = lazy(() => import('./pages/admin/EditProduct'));
@@ -138,7 +138,7 @@ const AnimatedRoutes = () => {
           {/* Admin Routes */}
           <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/products" element={<Products />} />
             <Route path="/admin/products/new" element={<NewProduct />} />
             <Route path="/admin/products/:id/edit" element={<EditProduct />} />

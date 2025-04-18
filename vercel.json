@@ -9,22 +9,14 @@
       }
     },
     {
-      "src": "server/server.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 60
-      }
+      "src": "server/index.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "server/server.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      }
+      "dest": "server/index.js"
     },
     {
       "src": "/(.*)",
@@ -32,29 +24,6 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "PORT": "5001",
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "JWT_EXPIRE": "30d",
-    "JWT_REFRESH_SECRET": "@jwt_refresh_secret",
-    "JWT_REFRESH_EXPIRE": "7d",
-    "ADMIN_EMAIL": "@admin_email",
-    "ADMIN_PASSWORD": "@admin_password",
-    "SMTP_HOST": "@smtp_host",
-    "SMTP_PORT": "@smtp_port",
-    "SMTP_SECURE": "@smtp_secure",
-    "SMTP_USER": "@smtp_user",
-    "SMTP_PASS": "@smtp_pass",
-    "SMTP_FROM": "@smtp_from",
-    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
-    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
-    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
-    "CLIENT_URL": "@client_url",
-    "ALPHA_VANTAGE_API_KEY": "@alpha_vantage_api_key",
-    "NEWSDATA_API_KEY": "@newsdata_api_key"
-  },
-  "includeFiles": [
-    "server/**/*"
-  ]
+    "NODE_ENV": "production"
+  }
 } 

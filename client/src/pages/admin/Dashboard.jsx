@@ -331,21 +331,21 @@ const Dashboard = () => {
             <ul role="list" className="divide-y divide-gray-100">
               {dashboardData?.recentOrders?.length > 0 ? (
                 dashboardData.recentOrders.map((order) => (
-                  <li key={order._id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <li key={order.id} className="p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {order.user?.name || 'Unknown Customer'}
+                          {order.customer}
                         </p>
                         <div className="flex items-center mt-1">
                           <p className="text-xs text-gray-500">
-                            Order #{order._id ? order._id.substring(0, 8) : 'N/A'} • {formatDate(order.createdAt)}
+                            Order #{order.id.substring(0, 8)} • {formatDate(order.date)}
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-sm font-medium text-gray-900">
-                          ${order.total?.toFixed(2) || '0.00'}
+                          ${order.amount.toFixed(2)}
                         </span>
                         <span
                           className={`mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -360,7 +360,7 @@ const Dashboard = () => {
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Unknown'}
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </div>
                     </div>

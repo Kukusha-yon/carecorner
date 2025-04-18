@@ -49,11 +49,22 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid login response');
       }
       
+      // Debug user data
+      console.log('Login response data:', data);
+      console.log('User data:', data.user);
+      console.log('User role:', data.user?.role);
+      
       setUser(data.user || null);
       setLoading(false);
       
-      // Use navigate with replace to avoid history stack issues
-      navigate('/dashboard', { replace: true });
+      // Navigate based on user role
+      if (data.user && data.user.role === 'admin') {
+        console.log('User is admin, navigating to admin dashboard');
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        console.log('User is not admin, navigating to home');
+        navigate('/', { replace: true });
+      }
       
       return data;
     } catch (error) {

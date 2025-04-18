@@ -1,93 +1,52 @@
 import axios from 'axios';
 
-// Use relative URLs for API requests
-// This will work with the Vite proxy in development and with the Vercel rewrites in production
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
-console.log('API URL:', API_URL);
-console.log('Environment:', import.meta.env.MODE);
-
-// Create axios instance
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  withCredentials: true, // Important for CORS with credentials
-  timeout: 10000, // 10 seconds timeout
+    'Content-Type': 'application/json'
+  }
 });
 
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('API request interceptor - URL:', config.url);
+    console.log('API request interceptor - Token present:', token ? 'Yes' : 'No');
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization header set:', config.headers.Authorization.substring(0, 20) + '...');
     }
-    
-    // Log request for debugging
-    console.log(`Making ${config.method.toUpperCase()} request to: ${config.url}`);
     
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
+    console.error('API request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    // Log successful responses
-    console.log(`Response from ${response.config.url}:`, response.status);
-    return response;
-  },
+  (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-    
-    // Log the error for debugging
-    console.error('API Error:', {
-      url: originalRequest.url,
-      method: originalRequest.method,
-      status: error.response?.status,
-      message: error.message,
-      data: error.response?.data
-    });
-    
-    // If error is 401 and we haven't tried to refresh token yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
+    if (error.response?.status === 401) {
       try {
-        // Try to refresh token
-        const response = await axios.post(`${API_URL}/auth/refresh-token`, {}, {
-          withCredentials: true
-        });
-        
-        if (response.data && response.data.token) {
-          localStorage.setItem('token', response.data.token);
-          originalRequest.headers.Authorization = `Bearer ${response.data.token}`;
-          return api(originalRequest);
-        } else {
-          throw new Error('Invalid refresh token response');
-        }
+        const response = await axios.post(`${API_URL}/auth/refresh-token`);
+        const { token } = response.data;
+        localStorage.setItem('token', token);
+        error.config.headers.Authorization = `Bearer ${token}`;
+        return api(error.config);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
-        // Clear local storage and redirect to login
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        
-        // Only redirect if we're not already on the login page
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
-        
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
-    
     return Promise.reject(error);
   }
 );

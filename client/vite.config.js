@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     visualizer({
-      filename: './dist/stats.html',
+      filename: 'dist/stats.html',
       open: true,
       gzipSize: true,
       brotliSize: true,
@@ -30,13 +30,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 3000,
     proxy: {
       '/api': {
-        target: 'https://carecorner-phi.vercel.app',
+        target: 'http://localhost:5001',
         changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

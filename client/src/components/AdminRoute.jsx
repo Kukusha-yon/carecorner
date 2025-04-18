@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import LoadingSpinner from './ui/LoadingSpinner';
 
 const AdminRoute = ({ children }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
   const [isChecking, setIsChecking] = useState(false);
 
@@ -15,11 +15,8 @@ const AdminRoute = ({ children }) => {
       if (user && !isChecking) {
         setIsChecking(true);
         try {
-          // Verify the user is still authenticated
-          const authenticated = isAuthenticated();
-          if (!authenticated) {
-            console.log('User is no longer authenticated');
-          }
+          // Simple check - if we have a user with admin role, we're good
+          console.log('Verifying admin access for user:', user.email, 'Role:', user.role);
         } catch (error) {
           console.error('Auth check failed:', error);
         } finally {
@@ -29,7 +26,7 @@ const AdminRoute = ({ children }) => {
     };
 
     verifyAuth();
-  }, [location.pathname, isAuthenticated, user, isChecking]);
+  }, [location.pathname, user]);
 
   if (loading || isChecking) {
     return (
@@ -51,6 +48,7 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
+  // User is authenticated and is an admin, render the children
   return children;
 };
 
