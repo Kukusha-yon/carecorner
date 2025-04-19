@@ -24,15 +24,20 @@ const connectDB = async () => {
     
     console.log('MongoDB URI (sanitized):', sanitizedUri);
     
+    // Check if MONGODB_URI is defined
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not defined');
+    }
+    
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 10000, // Increased timeout
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10, // Limit connection pool size
-      minPoolSize: 0, // Allow pool to scale down to zero
-      maxIdleTimeMS: 30000, // Close idle connections after 30 seconds
-      connectTimeoutMS: 10000, // Connection timeout
+      serverSelectionTimeoutMS: 5000, // Reduced timeout for serverless
+      socketTimeoutMS: 30000,
+      maxPoolSize: 5, // Reduced pool size for serverless
+      minPoolSize: 0,
+      maxIdleTimeMS: 10000, // Reduced idle time for serverless
+      connectTimeoutMS: 5000, // Reduced connection timeout for serverless
       retryWrites: true,
       retryReads: true
     });

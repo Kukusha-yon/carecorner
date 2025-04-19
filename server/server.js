@@ -59,7 +59,7 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL] 
+    ? [process.env.CLIENT_URL, 'https://carecorner-bl2n.vercel.app'] 
     : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -105,6 +105,16 @@ app.get('/', (req, res) => {
       health: '/api/health'
     },
     documentation: 'API documentation coming soon'
+  });
+});
+
+// Health check route
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Server is healthy',
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   });
 });
 
