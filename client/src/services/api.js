@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://carecorner-phi.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -34,6 +34,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.error('API response error:', error);
+    console.error('Error details:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    
     if (error.response?.status === 401) {
       try {
         const response = await axios.post(`${API_URL}/auth/refresh-token`);

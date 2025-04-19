@@ -57,13 +57,22 @@ app.use(helmet({
 }));
 
 // CORS configuration
+const allowedOrigins = [
+  'https://carecorner-bl2n.vercel.app', // Frontend URL
+  'http://localhost:3000', // Local development
+];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL, 'https://carecorner-bl2n.vercel.app'] 
-    : true, // Allow all origins in development
-  credentials: true,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Allow cookies and credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // Body parser
