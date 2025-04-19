@@ -2,7 +2,7 @@ import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import Button from './Button';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Phone, Mail, MessageCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const ProductCard = memo(({ product }) => {
@@ -20,7 +20,7 @@ const ProductCard = memo(({ product }) => {
     e.stopPropagation();
     
     if (product.countInStock === 0) {
-      toast.error('This product is out of stock');
+      toast.error('This product is currently out of stock. Please contact us for availability.');
       return;
     }
     
@@ -84,6 +84,26 @@ const ProductCard = memo(({ product }) => {
               <span className="text-sm text-red-600">Out of Stock</span>
             )}
           </div>
+
+          {product.countInStock === 0 ? (
+            <div className="bg-gray-50 rounded-lg p-3 mb-3">
+              <p className="text-sm text-gray-600 mb-2">This item is currently out of stock. Please contact us for availability:</p>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-center text-gray-600">
+                  <Phone className="w-4 h-4 mr-2" />
+                  <span>+251 911 123 456</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Mail className="w-4 h-4 mr-2" />
+                  <span>orders@carecorner.com</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <span>Telegram: @carecorner</span>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <Button
             onClick={handleAddToCart}

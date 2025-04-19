@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
-import { CheckCircle, Phone, Mail, MessageCircle, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Phone, Mail, MessageCircle, ShoppingBag, Package } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getUserOrders, getOrderById } from '../services/orderService';
 
@@ -178,6 +178,7 @@ const OrderSuccess = () => {
               className="bg-[#39b54a] hover:bg-[#2d8f3a] text-white"
               onClick={() => navigate('/order-history')}
             >
+              <Package className="w-5 h-5 mr-2" />
               View Order Status
             </Button>
             
@@ -188,6 +189,7 @@ const OrderSuccess = () => {
               className="border-[#39b54a] text-[#39b54a] hover:bg-[#39b54a] hover:text-white"
               onClick={() => navigate('/products')}
             >
+              <ShoppingBag className="w-5 h-5 mr-2" />
               Continue Shopping
             </Button>
           </div>
