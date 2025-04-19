@@ -88,10 +88,10 @@ const NewArrivalSection = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">New Arrivals</h2>
           <Link 
-            to="/new-arrivals" 
+            to="/products" 
             className="text-primary hover:text-primary-dark transition-colors text-xs sm:text-sm md:text-base"
           >
-            View All New Arrivals
+            View All Products
           </Link>
         </div>
       </div>

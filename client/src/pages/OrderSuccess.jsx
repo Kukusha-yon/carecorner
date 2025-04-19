@@ -30,6 +30,18 @@ const OrderSuccess = () => {
     else if (sessionStorage.getItem('orderSuccess') === 'true') {
       setOrderSuccess(true);
     }
+    
+    // If we have a lastOrderId in sessionStorage but no orderSuccess flag, set it
+    else if (sessionStorage.getItem('lastOrderId')) {
+      setOrderSuccess(true);
+      sessionStorage.setItem('orderSuccess', 'true');
+    }
+    
+    // If we have a last_cart_total in localStorage, it might indicate a recent order
+    else if (localStorage.getItem('last_cart_total')) {
+      setOrderSuccess(true);
+      sessionStorage.setItem('orderSuccess', 'true');
+    }
   }, [location]);
   
   // Fetch the latest orders to ensure the new order is visible
