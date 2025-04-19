@@ -115,8 +115,6 @@ const Checkout = () => {
       const result = await createOrder(orderData);
       console.log('Order created successfully:', result);
       
-      toast.success('Order placed successfully!');
-      
       // Store order success in sessionStorage before navigating
       sessionStorage.setItem('orderSuccess', 'true');
       if (result && result._id) {
@@ -126,13 +124,17 @@ const Checkout = () => {
       // Clear cart after order is successfully created
       clearCart();
       
-      // Navigate to order success page
+      // Show success toast
+      toast.success('Order placed successfully!');
+      
+      // Navigate to order success page with state
       navigate('/order-success', { 
         state: { 
           from: 'checkout', 
           orderId: result._id,
           orderItems: cartItemsBackup
-        } 
+        },
+        replace: true // This ensures the user can't go back to the checkout page
       });
     } catch (error) {
       toast.error(error.message || 'Failed to place order');
