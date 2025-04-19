@@ -45,15 +45,7 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", process.env.CLIENT_URL || "http://localhost:3000"]
-    }
-  }
+  contentSecurityPolicy: false
 }));
 
 // CORS configuration
