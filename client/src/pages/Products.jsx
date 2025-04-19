@@ -14,10 +14,7 @@ import CategoryFilter from '../components/ui/CategoryFilter';
 const Products = () => {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category');
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(category || 'all');
 
   const {
     filters,
@@ -48,48 +45,29 @@ const Products = () => {
     goToPreviousPage,
     changeLimit,
     setTotal,
-    setLoading: setPaginationLoading,
   } = usePagination(1, 12);
 
-  const { data: allProducts, isLoading, error: queryError } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts
+  const { data: productsData, isLoading, error } = useQuery({
+    queryKey: ['products', page, limit, searchTerm, sortBy, sortOrder, filters],
+    queryFn: () => getProducts({
+      page,
+      limit,
+      search: searchTerm,
+      sortBy,
+      sortOrder,
+      ...filters,
+    }),
   });
 
-  const filteredProducts = selectedCategory === 'all'
-    ? allProducts
-    : allProducts?.filter(product => product.category === selectedCategory);
+  const products = productsData?.products || [];
+  const totalProducts = productsData?.total || 0;
 
+  // Update total when products data changes
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setPaginationLoading(true);
-        setError(null);
-
-        const params = {
-          page,
-          limit,
-          search: searchTerm,
-          sortBy,
-          sortOrder,
-          ...filters,
-        };
-
-        const response = await productsAPI.getAll(params);
-        setProducts(response.data.products);
-        setTotal(response.data.total);
-      } catch (error) {
-        setError('Failed to fetch products. Please try again later.');
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-        setPaginationLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [page, limit, searchTerm, sortBy, sortOrder, filters]);
+    if (totalProducts) {
+      setTotal(totalProducts);
+    }
+  }, [totalProducts, setTotal]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -124,10 +102,10 @@ const Products = () => {
     );
   }
 
-  if (queryError) {
+  if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500">Error loading products: {queryError.message}</div>
+        <div className="text-red-500">Error loading products: {error.message}</div>
       </div>
     );
   }
@@ -142,7 +120,7 @@ const Products = () => {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filteredProducts?.map(product => (
+        {products?.map(product => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>

@@ -12,42 +12,18 @@ export const PRODUCT_CATEGORIES = {
 
 export const getProducts = async (params = {}) => {
   try {
-    console.log('getProducts called with params:', params);
-    const token = localStorage.getItem('token');
-    console.log('Authentication token for getProducts:', token ? 'Present' : 'Missing');
+    console.log('Fetching products with params:', params);
+    const response = await api.get('/products', { params });
+    console.log('Products response:', response.data);
     
-    // Log the full request configuration
-    const requestConfig = { 
-      params: {
-        ...params,
-        admin: params.admin ? 'true' : undefined
-      },
-      headers: token ? {
-        'Authorization': `Bearer ${token}`
-      } : {}
-    };
-    console.log('Request configuration:', JSON.stringify(requestConfig, null, 2));
+    // Handle both paginated and non-paginated responses
+    const products = response.data.products || response.data;
+    const total = response.data.total || products.length;
     
-    const response = await api.get('/products', requestConfig);
-    console.log('getProducts response:', response.data);
-    
-    // Check if the response has the expected structure
-    if (!response.data || !Array.isArray(response.data)) {
-      console.warn('Unexpected response format:', response.data);
-    } else {
-      console.log(`Received ${response.data.length} products`);
-    }
-    
-    return response.data;
+    console.log(`Received ${products.length} products`);
+    return { products, total };
   } catch (error) {
-    console.error('Error in getProducts:', error);
-    console.error('Error details:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      headers: error.response?.headers
-    });
+    console.error('Error fetching products:', error);
     throw error;
   }
 };
